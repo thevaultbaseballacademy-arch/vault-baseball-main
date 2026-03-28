@@ -9,7 +9,7 @@ workflows:
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
             node:22.11.0
-      java: 17
+      java:21
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
