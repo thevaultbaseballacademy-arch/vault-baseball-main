@@ -1,0 +1,124 @@
+<!-- 
+  VAULT™ OS — iOS Info.plist Additions
+  
+  These keys must be added to ios/App/App/Info.plist AFTER running:
+    npm run build:prod && npx cap add ios && npx cap sync ios
+  
+  In Xcode, open ios/App/App/Info.plist and add these entries.
+  OR merge them into the plist file directly.
+-->
+<dict>
+  <!-- App Display Name -->
+  <key>CFBundleDisplayName</key>
+  <string>VAULT OS</string>
+  
+  <!-- Bundle ID - must match App Store Connect -->
+  <key>CFBundleIdentifier</key>
+  <string>com.vaultbaseball.os</string>
+  
+  <!-- Marketing version (shown in App Store) -->
+  <key>CFBundleShortVersionString</key>
+  <string>1.0.0</string>
+  
+  <!-- Build number (increment for each TestFlight/store upload) -->
+  <key>CFBundleVersion</key>
+  <string>1</string>
+  
+  <!-- Privacy Permission Strings — REQUIRED by App Store -->
+  <key>NSCameraUsageDescription</key>
+  <string>VAULT™ OS uses your camera to record training videos for coach analysis and to capture your profile photo.</string>
+  
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>VAULT™ OS accesses your photo library to upload training videos and profile photos.</string>
+  
+  <key>NSPhotoLibraryAddUsageDescription</key>
+  <string>VAULT™ OS saves your training videos and analysis results to your photo library.</string>
+  
+  <key>NSMicrophoneUsageDescription</key>
+  <string>VAULT™ OS uses your microphone during live remote coaching sessions.</string>
+  
+  <key>NSFaceIDUsageDescription</key>
+  <string>VAULT™ OS uses Face ID for secure, fast login to protect your athlete data.</string>
+  
+  <key>NSContactsUsageDescription</key>
+  <string>VAULT™ OS does not access your contacts. This permission is not used.</string>
+  
+  <!-- Push Notifications entitlement -->
+  <key>UIBackgroundModes</key>
+  <array>
+    <string>remote-notification</string>
+    <string>fetch</string>
+  </array>
+  
+  <!-- Status bar style -->
+  <key>UIStatusBarStyle</key>
+  <string>UIStatusBarStyleLightContent</string>
+  
+  <key>UIViewControllerBasedStatusBarAppearance</key>
+  <false/>
+  
+  <!-- Supported orientations -->
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
+  
+  <!-- iPad orientations -->
+  <key>UISupportedInterfaceOrientations~ipad</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
+  
+  <!-- App Transport Security - allow HTTPS only -->
+  <key>NSAppTransportSecurity</key>
+  <dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <false/>
+    <key>NSExceptionDomains</key>
+    <dict>
+      <!-- Supabase -->
+      <key>supabase.co</key>
+      <dict>
+        <key>NSIncludesSubdomains</key>
+        <true/>
+        <key>NSThirdPartyExceptionAllowsInsecureHTTPLoads</key>
+        <false/>
+      </dict>
+      <!-- Stripe -->
+      <key>stripe.com</key>
+      <dict>
+        <key>NSIncludesSubdomains</key>
+        <true/>
+        <key>NSThirdPartyExceptionAllowsInsecureHTTPLoads</key>
+        <false/>
+      </dict>
+      <!-- Google Fonts (loaded at runtime) -->
+      <key>googleapis.com</key>
+      <dict>
+        <key>NSIncludesSubdomains</key>
+        <true/>
+        <key>NSThirdPartyExceptionAllowsInsecureHTTPLoads</key>
+        <false/>
+      </dict>
+    </dict>
+  </dict>
+  
+  <!-- URL Schemes for OAuth callbacks -->
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>com.vaultbaseball.os</string>
+      </array>
+      <key>CFBundleURLName</key>
+      <string>com.vaultbaseball.os</string>
+    </dict>
+  </array>
+</dict>

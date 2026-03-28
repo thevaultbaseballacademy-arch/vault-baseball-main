@@ -1,0 +1,256 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "@fontsource/bebas-neue";
+@import "@fontsource/inter";
+
+@layer base {
+  :root {
+    /* VAULT Baseball - Matte Black / Off-White / Steel Grey Industrial Palette */
+    --background: 0 0% 96%; /* Off-White #F5F5F5 */
+    --foreground: 0 0% 9%; /* Matte Black #181818 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    --primary: 0 0% 9%; /* Matte Black #181818 */
+    --primary-foreground: 0 0% 96%;
+
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 29%; /* Steel Grey #4A4A4A */
+
+    --accent: 0 0% 29%; /* Steel Grey */
+    --accent-foreground: 0 0% 96%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 9%;
+
+    --radius: 0px; /* No rounded edges - rectangular */
+
+    /* VAULT Pillar Accent Colors */
+    --vault-velocity: 0 70% 54%; /* Red #DF3232 */
+    --vault-athleticism: 220 92% 52%; /* Blue #155FF6 */
+    --vault-utility: 44 100% 59%; /* Gold #FFC32E */
+    --vault-longevity: 150 75% 53%; /* Green #2AE685 */
+    --vault-transfer: 0 0% 73%; /* Silver #B9B9B9 */
+
+    /* Vault Custom tokens */
+    --metallic: 0 0% 73%;
+    --steel: 0 0% 29%;
+    --chrome: 0 0% 85%;
+    
+    --glow-primary: 0 0 60px hsl(0 0% 9% / 0.15);
+    --glow-subtle: 0 0 40px hsl(0 0% 9% / 0.08);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 96%) 0%, hsl(0 0% 92%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0 0% 9%) 0%, hsl(0 0% 15%) 100%);
+    --gradient-metallic: linear-gradient(135deg, hsl(0 0% 85%) 0%, hsl(0 0% 60%) 50%, hsl(0 0% 75%) 100%);
+    --gradient-text: linear-gradient(135deg, hsl(0 0% 9%) 0%, hsl(0 0% 29%) 100%);
+
+    /* Typography */
+    --font-display: "Bebas Neue", sans-serif;
+    --font-body: "Inter", sans-serif;
+
+    /* Animations */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 0 0% 9%;
+    --sidebar-primary-foreground: 0 0% 96%;
+    --sidebar-accent: 0 0% 92%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 85%;
+    --sidebar-ring: 0 0% 9%;
+  }
+
+  .dark {
+    --background: 0 0% 6%; /* Dark matte black */
+    --foreground: 0 0% 96%; /* Off-white */
+
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 96%;
+
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 96%;
+
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 9%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 96%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 0 0% 65%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 96%;
+
+    /* Dark mode custom tokens */
+    --metallic: 0 0% 60%;
+    --steel: 0 0% 45%;
+    --chrome: 0 0% 70%;
+    
+    --glow-primary: 0 0 60px hsl(0 0% 96% / 0.1);
+    --glow-subtle: 0 0 40px hsl(0 0% 96% / 0.05);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 6%) 0%, hsl(0 0% 9%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 10%) 0%, hsl(0 0% 6%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0 0% 96%) 0%, hsl(0 0% 80%) 100%);
+    --gradient-metallic: linear-gradient(135deg, hsl(0 0% 45%) 0%, hsl(0 0% 60%) 50%, hsl(0 0% 50%) 100%);
+    --gradient-text: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 70%) 100%);
+
+    --sidebar-background: 0 0% 9%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 0 0% 96%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 0 0% 96%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-wider uppercase;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.05em;
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .gradient-metallic {
+    background: var(--gradient-metallic);
+  }
+
+  .gradient-text {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-subtle {
+    box-shadow: var(--glow-subtle);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 40px hsl(0 0% 9% / 0.2);
+  }
+
+  .metallic-text {
+    background: linear-gradient(135deg, hsl(0 0% 20%) 0%, hsl(0 0% 45%) 50%, hsl(0 0% 25%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .steel-border {
+    border-image: linear-gradient(135deg, hsl(0 0% 70%), hsl(0 0% 50%), hsl(0 0% 65%)) 1;
+  }
+
+  /* Pillar accent utilities */
+  .text-velocity { color: hsl(var(--vault-velocity)); }
+  .text-athleticism { color: hsl(var(--vault-athleticism)); }
+  .text-utility { color: hsl(var(--vault-utility)); }
+  .text-longevity { color: hsl(var(--vault-longevity)); }
+  .text-transfer { color: hsl(var(--vault-transfer)); }
+
+  .bg-velocity { background-color: hsl(var(--vault-velocity)); }
+  .bg-athleticism { background-color: hsl(var(--vault-athleticism)); }
+  .bg-utility { background-color: hsl(var(--vault-utility)); }
+  .bg-longevity { background-color: hsl(var(--vault-longevity)); }
+  .bg-transfer { background-color: hsl(var(--vault-transfer)); }
+
+  .border-velocity { border-color: hsl(var(--vault-velocity)); }
+  .border-athleticism { border-color: hsl(var(--vault-athleticism)); }
+  .border-utility { border-color: hsl(var(--vault-utility)); }
+  .border-longevity { border-color: hsl(var(--vault-longevity)); }
+  .border-transfer { border-color: hsl(var(--vault-transfer)); }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Safe-area insets — required because index.html uses viewport-fit=cover.
+   Without these, content is clipped behind the iPhone notch / Dynamic Island
+   and the home-indicator bar on bottom.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Utility classes — apply to fixed/sticky bars and page wrappers */
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left   { padding-left:   env(safe-area-inset-left); }
+.safe-right  { padding-right:  env(safe-area-inset-right); }
+.safe-x      { padding-left:   env(safe-area-inset-left);
+               padding-right:  env(safe-area-inset-right); }
+.safe-all    { padding-top:    env(safe-area-inset-top);
+               padding-right:  env(safe-area-inset-right);
+               padding-bottom: env(safe-area-inset-bottom);
+               padding-left:   env(safe-area-inset-left); }
+
+/* Root body gets bottom inset so fixed bottom navbars clear the home indicator */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Prevent content from starting under the status bar */
+#root {
+  padding-top: env(safe-area-inset-top);
+}

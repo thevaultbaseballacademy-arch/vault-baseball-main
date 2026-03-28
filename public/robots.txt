@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /parent
+Disallow: /coach
+Disallow: /admin
+Sitemap: https://vaultbaseball.app/sitemap.xml

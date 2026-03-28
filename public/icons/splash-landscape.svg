@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2688 1242" width="2688" height="1242">
+  <rect width="1242" height="2688" fill="#0d0d0d"/>
+  
+  <!-- Subtle grid texture -->
+  <defs>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1242" height="2688" fill="url(#grid)" opacity="0.5"/>
+  
+  <!-- Center V mark - large -->
+  <g transform="translate(1344, 621)">
+    <!-- Gold V shape -->
+    <path d="M-320,-380 L-60,320 L0,200 L60,320 L320,-380 L240,-380 L0,180 L-240,-380 Z" 
+          fill="#e8c848" opacity="0.9"/>
+  </g>
+  
+  <!-- VAULT text -->
+  <text x="621" y="900" 
+        font-family="Arial Black, Impact, sans-serif"
+        font-size="140" font-weight="900"
+        fill="#ffffff" text-anchor="middle" letter-spacing="20">VAULT</text>
+        
+  <!-- Subtitle -->
+  <text x="621" y="960"
+        font-family="Arial, sans-serif"
+        font-size="48" font-weight="400"
+        fill="#e8c848" text-anchor="middle" letter-spacing="24" opacity="0.85">BASEBALL &amp; SOFTBALL OS</text>
+  
+  <!-- Tagline -->
+  <text x="621" y="1020"
+        font-family="Arial, sans-serif"
+        font-size="36"
+        fill="#666666" text-anchor="middle" letter-spacing="8">ELITE DEVELOPMENT PLATFORM</text>
+</svg>
