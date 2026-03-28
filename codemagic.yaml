@@ -8,7 +8,7 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: v20.11.0
+            node: v22.11.0
       java: 17
     scripts:
       - name: Install dependencies
