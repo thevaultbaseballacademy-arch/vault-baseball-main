@@ -14,18 +14,15 @@ import RoleGuard from "@/components/RoleGuard";
 import { Loader2 } from "lucide-react";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 
-// Only eagerly load the landing page and auth
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 
-// Global loading fallback
 const PageLoader = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <Loader2 className="w-8 h-8 animate-spin text-primary" />
   </div>
 );
 
-// Lazy load everything else
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Account = lazy(() => import("./pages/Account"));
@@ -185,7 +182,6 @@ const ProspectGrader = lazy(() => import("./pages/ProspectGrader"));
 const GameIntelligence = lazy(() => import("./pages/GameIntelligence"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const ParentHub = lazy(() => import("./pages/parent/ParentHub"));
-const ParentAnalytics = lazy(() => import("./pages/parent/ParentAnalytics"));
 const ParentEducation = lazy(() => import("./pages/parent/ParentEducation"));
 const StateOfGame = lazy(() => import("./pages/StateOfGame"));
 const RecoverySystem = lazy(() => import("./pages/RecoverySystem"));
@@ -193,11 +189,9 @@ const StrengthConditioning = lazy(() => import("./pages/StrengthConditioning"));
 const PracticePlanBuilder = lazy(() => import("./pages/team/PracticePlanBuilder"));
 const DPFlexBuilder = lazy(() => import("./pages/softball/DPFlexBuilder"));
 
-// Lazy load global widgets that aren't needed on first paint
 const CookieConsent = lazy(() => import("@/components/CookieConsent").then(m => ({ default: m.CookieConsent })));
 const EddieAIChat = lazy(() => import("@/components/EddieAIChat").then(m => ({ default: m.EddieAIChat })));
 
-// Redirect /courses/:id to /course/:id
 const CoursesRedirect = () => {
   const { courseId } = useParams<{ courseId: string }>();
   return <Navigate to={`/course/${courseId}`} replace />;
@@ -206,15 +200,14 @@ const CoursesRedirect = () => {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes  
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
     },
   },
 });
 
-/** Must be rendered inside BrowserRouter so useNavigate is available */
 const AndroidBackButtonHandler = () => {
   useAndroidBackButton();
   return null;
@@ -229,11 +222,9 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AndroidBackButtonHandler />
-          {/* Site-wide Founder's Pricing Urgency Banner */}
           <FoundersPricingBanner />
           <SessionExpiryHandler />
           <BiometricGate />
-          
           <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -243,25 +234,10 @@ const App = () => (
             <Route path="/account" element={<Account />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/checkin" element={<Checkin />} />
-            
-            {/* Protected app routes with trial check */}
-            <Route path="/dashboard" element={
-              <TrialProtectedRoute>
-                <Dashboard />
-              </TrialProtectedRoute>
-            } />
-            <Route path="/downloads" element={
-              <TrialProtectedRoute><AthleteDownloads /></TrialProtectedRoute>
-            } />
-            <Route path="/vault" element={
-              <TrialProtectedRoute>
-                <VaultDashboard />
-              </TrialProtectedRoute>
-            } />
-            {/* Coach Dashboard — nested layout with sidebar */}
-            <Route path="/coach" element={
-              <RoleGuard requiresRole={["coach", "owner"]}><CoachDashboardLayout /></RoleGuard>
-            }>
+            <Route path="/dashboard" element={<TrialProtectedRoute><Dashboard /></TrialProtectedRoute>} />
+            <Route path="/downloads" element={<TrialProtectedRoute><AthleteDownloads /></TrialProtectedRoute>} />
+            <Route path="/vault" element={<TrialProtectedRoute><VaultDashboard /></TrialProtectedRoute>} />
+            <Route path="/coach" element={<RoleGuard requiresRole={["coach", "owner"]}><CoachDashboardLayout /></RoleGuard>}>
               <Route index element={<CoachAthletes />} />
               <Route path="kpis" element={<CoachKPIs />} />
               <Route path="lessons" element={<CoachLessons />} />
@@ -271,287 +247,46 @@ const App = () => (
               <Route path="profile" element={<CoachProfilePage />} />
               <Route path="downloads" element={<CoachDownloads />} />
             </Route>
-            <Route path="/coach-dashboard" element={
-              <RoleGuard requiresRole={["coach", "owner"]}><CoachDashboard /></RoleGuard>
-            } />
-            <Route path="/owner" element={
-              <RoleGuard requires="view_revenue_dashboard"><OwnerCommandCenter /></RoleGuard>
-            } />
-            {/* Owner Dashboard — nested layout with sidebar */}
-            <Route path="/admin" element={
-              <RoleGuard requires="view_platform_settings"><OwnerDashboardLayout /></RoleGuard>
-            }>
+            <Route path="/coach-dashboard" element={<RoleGuard requiresRole={["coach", "owner"]}><CoachDashboard /></RoleGuard>} />
+            <Route path="/owner" element={<RoleGuard requires="view_revenue_dashboard"><OwnerCommandCenter /></RoleGuard>} />
+            <Route path="/admin" element={<RoleGuard requires="view_platform_settings"><OwnerDashboardLayout /></RoleGuard>}>
               <Route index element={<OwnerOverview />} />
-              <Route path="revenue" element={
-                <RoleGuard requires="view_revenue_dashboard"><OwnerRevenue /></RoleGuard>
-              } />
-              <Route path="users" element={
-                <RoleGuard requires="view_all_users"><OwnerUsers /></RoleGuard>
-              } />
-              <Route path="content/queue" element={
-                <RoleGuard requires="approve_content"><OwnerContentQueue /></RoleGuard>
-              } />
-              <Route path="content" element={
-                <RoleGuard requires="approve_content"><OwnerContent /></RoleGuard>
-              } />
-              <Route path="intelligence" element={
-                <RoleGuard requires="view_intelligence_rules"><OwnerIntelligence /></RoleGuard>
-              } />
-              <Route path="settings" element={
-                <RoleGuard requires="view_platform_settings"><OwnerSettings /></RoleGuard>
-              } />
-              <Route path="analytics" element={
-                <RoleGuard requires="view_platform_analytics"><OwnerAnalytics /></RoleGuard>
-              } />
-              <Route path="health" element={
-                <RoleGuard requires="view_platform_analytics"><OwnerHealthMetrics /></RoleGuard>
-              } />
-              <Route path="maintenance" element={
-                <RoleGuard requires="view_platform_settings"><OwnerMaintenance /></RoleGuard>
-              } />
-              <Route path="audit" element={
-                <RoleGuard requires="view_audit_log"><OwnerAudit /></RoleGuard>
-              } />
-              {/* Legacy sub-routes */}
-              <Route path="certification-analytics" element={
-                <RoleGuard requires="view_platform_analytics"><CertificationAnalytics /></RoleGuard>
-              } />
-              <Route path="coaches" element={
-                <RoleGuard requires="view_all_users"><AdminCoaches /></RoleGuard>
-              } />
-              <Route path="exams" element={
-                <RoleGuard requires="view_platform_settings"><AdminExams /></RoleGuard>
-              } />
-              <Route path="certifications" element={
-                <RoleGuard requires="view_platform_settings"><AdminCertifications /></RoleGuard>
-              } />
-              <Route path="payouts" element={
-                <RoleGuard requires="process_payouts"><AdminPayouts /></RoleGuard>
-              } />
-              <Route path="coach-management" element={
-                <RoleGuard requires="view_all_users"><CoachManagement /></RoleGuard>
-              } />
-              <Route path="exports" element={
-                <RoleGuard requires="view_revenue_dashboard"><OwnerExports /></RoleGuard>
-              } />
+              <Route path="revenue" element={<RoleGuard requires="view_revenue_dashboard"><OwnerRevenue /></RoleGuard>} />
+              <Route path="users" element={<RoleGuard requires="view_all_users"><OwnerUsers /></RoleGuard>} />
+              <Route path="content/queue" element={<RoleGuard requires="approve_content"><OwnerContentQueue /></RoleGuard>} />
+              <Route path="content" element={<RoleGuard requires="approve_content"><OwnerContent /></RoleGuard>} />
+              <Route path="intelligence" element={<RoleGuard requires="view_intelligence_rules"><OwnerIntelligence /></RoleGuard>} />
+              <Route path="settings" element={<RoleGuard requires="view_platform_settings"><OwnerSettings /></RoleGuard>} />
+              <Route path="analytics" element={<RoleGuard requires="view_platform_analytics"><OwnerAnalytics /></RoleGuard>} />
+              <Route path="health" element={<RoleGuard requires="view_platform_analytics"><OwnerHealthMetrics /></RoleGuard>} />
+              <Route path="maintenance" element={<RoleGuard requires="view_platform_settings"><OwnerMaintenance /></RoleGuard>} />
+              <Route path="audit" element={<RoleGuard requires="view_audit_log"><OwnerAudit /></RoleGuard>} />
+              <Route path="certification-analytics" element={<RoleGuard requires="view_platform_analytics"><CertificationAnalytics /></RoleGuard>} />
+              <Route path="coaches" element={<RoleGuard requires="view_all_users"><AdminCoaches /></RoleGuard>} />
+              <Route path="exams" element={<RoleGuard requires="view_platform_settings"><AdminExams /></RoleGuard>} />
+              <Route path="certifications" element={<RoleGuard requires="view_platform_settings"><AdminCertifications /></RoleGuard>} />
+              <Route path="payouts" element={<RoleGuard requires="process_payouts"><AdminPayouts /></RoleGuard>} />
+              <Route path="coach-management" element={<RoleGuard requires="view_all_users"><CoachManagement /></RoleGuard>} />
+              <Route path="exports" element={<RoleGuard requires="view_revenue_dashboard"><OwnerExports /></RoleGuard>} />
             </Route>
-            <Route path="/community" element={
-              <TrialProtectedRoute>
-                <Community />
-              </TrialProtectedRoute>
-            } />
+            <Route path="/community" element={<TrialProtectedRoute><Community /></TrialProtectedRoute>} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:courseId" element={<CoursesRedirect />} />
-            <Route path="/course/:courseId" element={
-              <TrialProtectedRoute>
-                <CourseDetail />
-              </TrialProtectedRoute>
-            } />
-            <Route path="/my-programs" element={
-              <TrialProtectedRoute>
-                <MyPrograms />
-              </TrialProtectedRoute>
-            } />
+            <Route path="/course/:courseId" element={<TrialProtectedRoute><CourseDetail /></TrialProtectedRoute>} />
+            <Route path="/my-programs" element={<TrialProtectedRoute><MyPrograms /></TrialProtectedRoute>} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/pathway/youth" element={<YouthPathway />} />
             <Route path="/pathway/academy" element={<AcademyPathway />} />
-            <Route path="/longevity" element={
-              <TrialProtectedRoute>
-                <LongevityDashboard />
-              </TrialProtectedRoute>
-            } />
-            <Route path="/calendar" element={
-              <TrialProtectedRoute>
-                <WeeklyCalendar />
-              </TrialProtectedRoute>
-            } />
+            <Route path="/longevity" element={<TrialProtectedRoute><LongevityDashboard /></TrialProtectedRoute>} />
+            <Route path="/calendar" element={<TrialProtectedRoute><WeeklyCalendar /></TrialProtectedRoute>} />
             <Route path="/certifications" element={<Certifications />} />
             <Route path="/certifications/exam/:certType" element={<CertificationExam />} />
             <Route path="/certifications/video-exam/:certType" element={<VideoExam />} />
             <Route path="/certifications/leaderboard" element={<CertificationLeaderboard />} />
             <Route path="/verify" element={<VerifyCertification />} />
             <Route path="/privacy-settings" element={<PrivacySettings />} />
-            {/* Payment Pages */}
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-canceled" element={<PaymentCanceled />} />
-            {/* Product Pages */}
             <Route path="/products" element={<Products />} />
-            <Route path="/products/longevity" element={<LongevitySystem />} />
-            <Route path="/products/transfer" element={<TransferSystem />} />
-            <Route path="/products/velocity-system" element={<VelocitySystem />} />
-            <Route path="/products/velocity-accelerator" element={<VelocityAccelerator />} />
-            <Route path="/products/teams" element={<TeamLicenses />} />
-            <Route path="/products/velo-check" element={<VeloCheck />} />
-            <Route path="/products/bundles" element={<Bundles />} />
-            <Route path="/products/recruitment" element={<RecruitmentAudit />} />
-            <Route path="/products/certified-coach" element={<CertifiedCoach />} />
-            <Route path="/products/transfer-intensive" element={<TransferIntensive />} />
-            <Route path="/products/vault-verified" element={<VaultVerifiedCoach />} />
-            <Route path="/products/showcase-prep" element={<ShowcasePrep />} />
-            <Route path="/products/video-analysis" element={<VideoAnalysis />} />
-            <Route path="/products/org-starter-pack" element={<OrgStarterPack />} />
-            <Route path="/products/org-licensing" element={<OrgLicensing />} />
-            <Route path="/products/remote-training" element={<RemoteTraining />} />
-            <Route path="/products/founders-access" element={<FoundersAccess />} />
-            <Route path="/products/athlete-assessment" element={<AthleteAssessment />} />
-            <Route path="/partner-claim" element={<PartnerClaim />} />
-            <Route path="/wall-of-wins" element={<WallOfWins />} />
-            <Route path="/find-coach" element={<FindCoach />} />
-            <Route path="/shared/:token" element={<SharedProfile />} />
-            <Route path="/verify-course-certificate" element={<VerifyCourseCertificate />} />
-            <Route path="/certificate-leaderboard" element={<CertificateLeaderboard />} />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/refunds" element={<RefundPolicy />} />
-            <Route path="/refund-policy" element={<RefundPolicy />} />
-            <Route path="/athlete-waiver" element={<AthleteWaiver />} />
-            <Route path="/cookie-settings" element={<CookieSettings />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/device-metrics" element={
-              <TrialProtectedRoute allowTrialAccess>
-                <DeviceMetrics />
-              </TrialProtectedRoute>
-            } />
-            <Route path="/data-ingestion" element={<TrialProtectedRoute><DeviceIngestionPage /></TrialProtectedRoute>} />
-            <Route path="/shared-metrics/:token" element={<SharedMetricsView />} />
-            
-            {/* Trial System Routes */}
-            <Route path="/trial" element={<Trial />} />
-            <Route path="/velocity-baseline" element={
-              <TrialProtectedRoute allowTrialAccess>
-                <VelocityBaseline />
-              </TrialProtectedRoute>
-            } />
-            <Route path="/trial-expired" element={<TrialExpired />} />
-            <Route path="/white-paper" element={<WhitePaper />} />
-            <Route path="/baseline-audit" element={<BaselineAudit />} />
-            <Route path="/performance-blueprint" element={<PerformanceBlueprint />} />
-            <Route path="/coach-register" element={<CoachRegister />} />
-            <Route path="/coach-onboarding" element={<CoachOnboarding />} />
-            <Route path="/lesson-packages" element={<LessonPackages />} />
-            <Route path="/remote-lessons" element={<RemoteLessons />} />
-            <Route path="/group-sessions" element={<GroupSessions />} />
-            <Route path="/free-velocity-guide" element={<FreeVelocityGuide />} />
-            <Route path="/athlete-onboarding" element={<AthleteOnboarding />} />
-            <Route path="/evaluate" element={<FreeEvaluation />} />
-            <Route path="/training-hub" element={<RemoteTrainingHub />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/marketplace/coach/:coachId" element={<CoachMarketplaceProfile />} />
-            <Route path="/progress-report/:token" element={<ProgressReport />} />
-            <Route path="/book-session" element={<BookSession />} />
-            <Route path="/claim-22m" element={<Claim22MAccess />} />
-            
-            {/* Softball Development */}
-            <Route path="/softball" element={
-              <TrialProtectedRoute>
-                <SoftballDevelopment />
-              </TrialProtectedRoute>
-            } />
-            <Route path="/softball/lessons/booking" element={<SoftballLessonBooking />} />
-            <Route path="/softball/lessons/coaches" element={<SoftballCoaches />} />
-            <Route path="/softball/lessons/notes" element={<SoftballLessonNotes />} />
-            <Route path="/softball/courses" element={<SoftballCourses />} />
-            <Route path="/softball/profile" element={<SoftballProfile />} />
-            <Route path="/softball/pitching" element={<SoftballPitching />} />
-            <Route path="/softball/hitting" element={<SoftballHitting />} />
-            <Route path="/softball/fielding" element={<SoftballFielding />} />
-            <Route path="/softball/analytics" element={<SoftballAnalytics />} />
-            <Route path="/softball/position-tracks" element={<SoftballPositionTracks />} />
-            
-            {/* Recruiting Readiness Engine */}
-            <Route path="/recruiting" element={
-              <TrialProtectedRoute><RecruitingHub /></TrialProtectedRoute>
-            } />
-            <Route path="/recruiting/profile" element={
-              <TrialProtectedRoute><RecruitingProfilePage /></TrialProtectedRoute>
-            } />
-            <Route path="/recruiting/showcases" element={
-              <TrialProtectedRoute><RecruitingShowcases /></TrialProtectedRoute>
-            } />
-            <Route path="/recruiting/contacts" element={
-              <TrialProtectedRoute><RecruitingContacts /></TrialProtectedRoute>
-            } />
-            <Route path="/recruiting/checklist" element={
-              <TrialProtectedRoute><RecruitingChecklist /></TrialProtectedRoute>
-            } />
-            <Route path="/recruiting/assistant" element={
-              <TrialProtectedRoute><RecruitingAssistantPage /></TrialProtectedRoute>
-            } />
-            
-            {/* Parent Portal — nested layout with sidebar */}
-            <Route path="/parent" element={
-              <RoleGuard requiresRole={["parent", "athlete", "owner"]}><ParentDashboardLayout /></RoleGuard>
-            }>
-              <Route index element={<ParentHub />} />
-              <Route path="progress" element={<ParentProgress />} />
-              <Route path="lessons" element={<ParentLessons />} />
-              <Route path="training" element={<ParentTraining />} />
-              <Route path="wellness" element={<ParentWellness />} />
-              <Route path="recruiting" element={<ParentRecruiting />} />
-              <Route path="messages" element={<ParentMessages />} />
-              <Route path="downloads" element={<ParentDownloads />} />
-              <Route path="prospect" element={<ParentProspect />} />
-              <Route path="analytics" element={<ParentAnalytics />} />
-              <Route path="education" element={<ParentEducation />} />
-            </Route>
-
-            {/* Workload & Health Management */}
-            <Route path="/workload" element={<TrialProtectedRoute><WorkloadDashboard /></TrialProtectedRoute>} />
-            <Route path="/workload/pitch-log" element={<TrialProtectedRoute><PitchLog /></TrialProtectedRoute>} />
-            <Route path="/workload/arm-care" element={<TrialProtectedRoute><ArmCare /></TrialProtectedRoute>} />
-            <Route path="/workload/injuries" element={<TrialProtectedRoute><InjuryLog /></TrialProtectedRoute>} />
-            <Route path="/workload/daily-log" element={<TrialProtectedRoute><DailyWorkloadLog /></TrialProtectedRoute>} />
-            <Route path="/workload/tournament" element={<TrialProtectedRoute><TournamentMode /></TrialProtectedRoute>} />
-
-            {/* Team Management */}
-            <Route path="/team" element={<TrialProtectedRoute><TeamHub /></TrialProtectedRoute>} />
-            <Route path="/team/roster" element={<TrialProtectedRoute><TeamRoster /></TrialProtectedRoute>} />
-            <Route path="/team/schedule" element={<TrialProtectedRoute><TeamSchedule /></TrialProtectedRoute>} />
-            <Route path="/team/announcements" element={<TrialProtectedRoute><TeamAnnouncements /></TrialProtectedRoute>} />
-            <Route path="/team/analytics" element={<TrialProtectedRoute><TeamAnalytics /></TrialProtectedRoute>} />
-            <Route path="/team/practice-plans" element={<RoleGuard requiresRole={["coach", "owner"]}><PracticePlanBuilder /></RoleGuard>} />
-
-            {/* Mental Performance & S&C */}
-            <Route path="/mental-performance" element={<TrialProtectedRoute><MentalPerformance /></TrialProtectedRoute>} />
-            <Route path="/nutrition-coach" element={<TrialProtectedRoute><NutritionCoach /></TrialProtectedRoute>} />
-            <Route path="/prospect-grader" element={<TrialProtectedRoute><ProspectGrader /></TrialProtectedRoute>} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/game-intelligence" element={<TrialProtectedRoute><GameIntelligence /></TrialProtectedRoute>} />
-            <Route path="/recovery-system" element={<TrialProtectedRoute><RecoverySystem /></TrialProtectedRoute>} />
-            <Route path="/state-of-game" element={<TrialProtectedRoute><StateOfGame /></TrialProtectedRoute>} />
-            <Route path="/strength-conditioning" element={<TrialProtectedRoute><StrengthConditioning /></TrialProtectedRoute>} />
-
-            {/* Softball DP/Flex */}
-            <Route path="/softball/dp-flex" element={<RoleGuard requiresRole={["coach", "owner"]}><DPFlexBuilder /></RoleGuard>} />
-
-            {/* Short URL redirects for social sharing */}
-            <Route path="/app" element={<ShortRedirect />} />
-            <Route path="/training" element={<ShortRedirect />} />
-            <Route path="/start" element={<ShortRedirect />} />
-            <Route path="/22m" element={<ShortRedirect />} />
-            <Route path="/coaching" element={<ShortRedirect />} />
-            <Route path="/join" element={<ShortRedirect />} />
-            <Route path="/programs" element={<ShortRedirect />} />
-            <Route path="/velocity" element={<ShortRedirect />} />
-            <Route path="/founders" element={<ShortRedirect />} />
-            <Route path="/guide" element={<ShortRedirect />} />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          </Suspense>
-          <Suspense fallback={null}>
-            <CookieConsent />
-            <EddieAIChat />
-          </Suspense>
-        </BrowserRouter>
-      </TooltipProvider>
-      </SportProvider>
-    </SubscriptionProvider>
-  </QueryClientProvider>
-);
-
-export default App;
+            <Route path="/products​​​​​​​​​​​​​​​​
