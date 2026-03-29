@@ -80,8 +80,9 @@ workflows:
             -scheme App \
             -configuration Release \
             -archivePath $CM_BUILD_DIR/App.xcarchive \
-            -allowProvisioningUpdates \
-            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="Vault OS" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
             DEVELOPMENT_TEAM=6L8J9ZP8RL
           xcodebuild -exportArchive \
             -archivePath $CM_BUILD_DIR/App.xcarchive \
