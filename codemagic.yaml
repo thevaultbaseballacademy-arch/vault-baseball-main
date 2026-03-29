@@ -80,19 +80,17 @@ workflows:
             -scheme App \
             -configuration Release \
             -archivePath $CM_BUILD_DIR/App.xcarchive \
-            CODE_SIGN_STYLE=Manual \
-            PROVISIONING_PROFILE_SPECIFIER="$CM_PROVISIONING_PROFILE_SPECIFIER" \
-            CODE_SIGN_IDENTITY="$CM_CODE_SIGN_IDENTITY" \
-            DEVELOPMENT_TEAM=6L8J9ZP8RL
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=6L8J9ZP8RL \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath $CM_AUTH_KEY_PATH \
+            -authenticationKeyID $CM_AUTH_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $CM_AUTH_KEY_ISSUER_ID
           xcodebuild -exportArchive \
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             -exportPath $CM_BUILD_DIR/ipa \
             -exportOptionsPlist ExportOptions.plist \
-            -allowProvisioningUpdates
-    artifacts:
-      - $CM_BUILD_DIR/ipa/*.ipa
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
-        submit_to_app_store: false
+            -allowProvisioningUpdates \
+            -authenticationKeyPath $CM_AUTH_KEY_PATH \
+            -authenticationKeyID $CM_AUTH_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $CM_AUTH_KEY_ISSUER_ID
