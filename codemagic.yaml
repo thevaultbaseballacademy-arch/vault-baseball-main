@@ -8,8 +8,8 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-            node:22.11.0
-      java: 21
+      node: 20.11.0
+      java: 17
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
@@ -24,10 +24,40 @@ workflows:
           fi
       - name: Sync Capacitor
         script: npx cap sync android
-      - name: Build Android AAB
+      - name: Set up signing
+        script: |
+          echo "storeFile=$CM_KEYSTORE_PATH" >> android/gradle.properties
+          echo "storePassword=$CM_KEYSTORE_PASSWORD" >> android/gradle.properties
+          echo "keyAlias=$CM_KEY_ALIAS" >> android/gradle.properties
+          echo "keyPassword=$CM_KEY_PASSWORD" >> android/gradle.properties
+      - name: Update build.gradle for signing
+        script: |
+          cat >> android/app/build.gradle << 'GRADLE'
+
+          android {
+            signingConfigs {
+              release {
+                storeFile file(System.getProperty("user.home") + "/.android/vault_keystore.jks")
+                storePassword System.getenv("CM_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("CM_KEY_ALIAS")
+                keyPassword System.getenv("CM_KEY_PASSWORD")
+              }
+            }
+            buildTypes {
+              release {
+                signingConfig signingConfigs.release
+              }
+            }
+          }
+          GRADLE
+      - name: Build signed Android AAB
         script: |
           cd android
-          ./gradlew bundleRelease
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
     artifacts:
       - android/app/build/outputs/**/*.aab
     publishing:
@@ -50,7 +80,7 @@ workflows:
       vars:
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
-            node:22.11.0
+      node: 20.11.0
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
