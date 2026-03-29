@@ -73,7 +73,7 @@ workflows:
         script: npx cap add ios
       - name: Sync iOS
         script: npx cap sync ios
-      - name: Build iOS
+      - name: - name: Build iOS
         script: |
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
@@ -81,18 +81,11 @@ workflows:
             -configuration Release \
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             CODE_SIGN_STYLE=Manual \
-            PROVISIONING_PROFILE_SPECIFIER="Vault OS" \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="$CM_PROVISIONING_PROFILE_SPECIFIER" \
+            CODE_SIGN_IDENTITY="$CM_CODE_SIGN_IDENTITY" \
             DEVELOPMENT_TEAM=6L8J9ZP8RL
           xcodebuild -exportArchive \
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             -exportPath $CM_BUILD_DIR/ipa \
             -exportOptionsPlist ExportOptions.plist \
             -allowProvisioningUpdates
-    artifacts:
-      - $CM_BUILD_DIR/ipa/*.ipa
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
-        submit_to_app_store: false
