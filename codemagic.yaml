@@ -52,14 +52,9 @@ workflows:
     integrations:
       app_store_connect: VAULT_APP_STORE_CONNECT
     environment:
-         environment:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.vaultbaseball.os
-      node: 22.11.0
-      vars:
-        XCODE_WORKSPACE: ios/App/App.xcworkspace
-        XCODE_SCHEME: App
       node: 22.11.0
     scripts:
       - name: Install dependencies
@@ -81,8 +76,7 @@ workflows:
         script: |
           xcode-project build-ipa \
             --workspace "ios/App/App.xcworkspace" \
-            --scheme "App" \
-            --config "Release"
+            --scheme "App"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
