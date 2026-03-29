@@ -75,13 +75,21 @@ workflows:
         script: npx cap sync ios
       - name: Build iOS
         script: |
-          cd ios/App
-          ls -la
-          xcode-project build-ipa \
-            --project "App.xcodeproj" \
-            --scheme "App"
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -archivePath $CM_BUILD_DIR/App.xcarchive \
+            -allowProvisioningUpdates \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM=6L8J9ZP8RL
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/App.xcarchive \
+            -exportPath $CM_BUILD_DIR/ipa \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates
     artifacts:
-      - build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/ipa/*.ipa
     publishing:
       app_store_connect:
         auth: integration
