@@ -69,14 +69,23 @@ workflows:
             mkdir -p dist
             echo "<html><body></body></html>" > dist/index.html
           fi
+          ls -la dist/
       - name: Add iOS
         script: npx cap add ios
       - name: Sync iOS
         script: npx cap sync ios
+      - name: Install pods
+        script: |
+          cd ios/App
+          ls -la
+          pod install --repo-update
+          ls -la
       - name: Build iOS
         script: |
+          cd ios/App
+          ls -la
           xcode-project build-ipa \
-            --workspace "ios/App/App.xcworkspace" \
+            --workspace "App.xcworkspace" \
             --scheme "App"
     artifacts:
       - build/ios/ipa/*.ipa
