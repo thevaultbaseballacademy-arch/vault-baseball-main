@@ -73,7 +73,7 @@ workflows:
         script: npx cap add ios
       - name: Sync iOS
         script: npx cap sync ios
-      - name: - name: Build iOS
+      - name: Build iOS
         script: |
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
@@ -89,3 +89,10 @@ workflows:
             -exportPath $CM_BUILD_DIR/ipa \
             -exportOptionsPlist ExportOptions.plist \
             -allowProvisioningUpdates
+    artifacts:
+      - $CM_BUILD_DIR/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
