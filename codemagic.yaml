@@ -8,7 +8,7 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: 20.11.0
+      node: 22.11.0
       java: 17
     scripts:
       - name: Install dependencies
@@ -80,7 +80,7 @@ workflows:
       vars:
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
-      node: 20.11.0
+      node: 22.11.0
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
