@@ -82,15 +82,9 @@ workflows:
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM=6L8J9ZP8RL \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath $CM_AUTH_KEY_PATH \
-            -authenticationKeyID $CM_AUTH_KEY_IDENTIFIER \
-            -authenticationKeyIssuerID $CM_AUTH_KEY_ISSUER_ID
+            -allowProvisioningUpdates
           xcodebuild -exportArchive \
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             -exportPath $CM_BUILD_DIR/ipa \
             -exportOptionsPlist ExportOptions.plist \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath $CM_AUTH_KEY_PATH \
-            -authenticationKeyID $CM_AUTH_KEY_IDENTIFIER \
-            -authenticationKeyIssuerID $CM_AUTH_KEY_ISSUER_ID
+            -allowProvisioningUpdates
