@@ -63,13 +63,12 @@ workflows:
         script: CI=false npm run build
       - name: Install Capacitor
         script: npm install -g @capacitor/cli
-      - name: Add iOS
+      - name: Add iOS and sync
         script: |
           if [ ! -d "ios" ]; then
             npx cap add ios
           fi
-      - name: Sync Capacitor
-        script: npx cap sync ios
+          npx cap sync ios
       - name: Install pods
         script: cd ios/App && pod install
       - name: Build iOS
