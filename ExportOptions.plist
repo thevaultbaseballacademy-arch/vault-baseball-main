@@ -11,7 +11,7 @@
     <key>provisioningProfiles</key>
     <dict>
         <key>com.vaultbaseball.os</key>
-        <string>VAULT OS App Store</string>
+        <string>Vault OS</string>
     </dict>
     <key>uploadBitcode</key>
     <false/>
