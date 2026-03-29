@@ -65,12 +65,19 @@ workflows:
         script: npm install -g @capacitor/cli
       - name: Add iOS and sync
         script: |
+          echo "=== Node version ==="
+          node --version
+          echo "=== Capacitor version ==="
+          npx cap --version
+          echo "=== Running cap add ios ==="
           npx cap add ios
+          echo "=== Exit code: $? ==="
+          echo "=== Checking ios folder ==="
+          ls -la ios/ || echo "iOS FOLDER NOT CREATED"
+          echo "=== Checking Podfile ==="
+          ls -la ios/App/Podfile || echo "PODFILE NOT CREATED"
+          echo "=== Syncing ==="
           npx cap sync ios
-          echo "=== iOS folder contents ==="
-          ls -la ios/
-          echo "=== App folder contents ==="
-          ls -la ios/App/
       - name: Install pods
         script: |
           cd ios/App
