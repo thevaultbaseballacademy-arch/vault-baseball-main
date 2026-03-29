@@ -6,15 +6,18 @@
     <string>app-store</string>
     <key>teamID</key>
     <string>6L8J9ZP8RL</string>
+    <key>signingStyle</key>
+    <string>manual</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.vaultbaseball.os</key>
+        <string>VAULT OS App Store</string>
+    </dict>
     <key>uploadBitcode</key>
     <false/>
     <key>uploadSymbols</key>
     <true/>
     <key>compileBitcode</key>
     <false/>
-    <key>signingStyle</key>
-    <string>automatic</string>
-    <key>destination</key>
-    <string>upload</string>
 </dict>
 </plist>
