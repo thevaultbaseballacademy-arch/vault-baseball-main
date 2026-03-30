@@ -37,7 +37,10 @@ workflows:
             -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
             -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
     artifacts:
-      - android/app/build/outputs/**/*.aab
+       - $CM_BUILD_DIR/ipa/*.ipa
+      - $CM_BUILD_DIR/**/*.ipa
+      - /Users/builder/clone/**/*.ipa
+      - build/ios/ipa/*.ipa
     publishing:
       email:
         recipients:
