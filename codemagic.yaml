@@ -75,6 +75,9 @@ workflows:
         script: npx cap sync ios
       - name: Build iOS
         script: |
+          echo "Auth key path: $APP_STORE_CONNECT_PRIVATE_KEY"
+          echo "Key ID: $APP_STORE_CONNECT_KEY_IDENTIFIER"
+          echo "Issuer ID: $APP_STORE_CONNECT_ISSUER_ID"
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
             -scheme App \
@@ -83,14 +86,14 @@ workflows:
             CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM=6L8J9ZP8RL \
             -allowProvisioningUpdates \
-            -authenticationKeyPath $(find $CM_KEYCHAIN_PATH/../ -name "AuthKey_*.p8" | head -1) \
-            -authenticationKeyID $CM_AUTH_KEY_IDENTIFIER \
-            -authenticationKeyIssuerID $CM_AUTH_KEY_ISSUER_ID
+            -authenticationKeyPath <(echo "$APP_STORE_CONNECT_PRIVATE_KEY") \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
           xcodebuild -exportArchive \
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             -exportPath $CM_BUILD_DIR/ipa \
             -exportOptionsPlist ExportOptions.plist \
             -allowProvisioningUpdates \
-            -authenticationKeyPath $(find $CM_KEYCHAIN_PATH/../ -name "AuthKey_*.p8" | head -1) \
-            -authenticationKeyID $CM_AUTH_KEY_IDENTIFIER \
-            -authenticationKeyIssuerID $CM_AUTH_KEY_ISSUER_ID
+            -authenticationKeyPath <(echo "$APP_STORE_CONNECT_PRIVATE_KEY") \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
