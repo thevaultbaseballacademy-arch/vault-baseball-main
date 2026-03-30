@@ -75,17 +75,16 @@ workflows:
         script: npx cap sync ios
       - name: Install provisioning profile
         script: |
-          PROFILE_PATH="/Users/builder/Library/MobileDevice/Provisioning Profiles/provisioning_profile_tfsn44fv.mobileprovision"
-          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH" 2>/dev/null))
-          if [ -z "$UUID" ]; then
-            UUID=$(strings "$PROFILE_PATH" | grep -E "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$" | head -1)
-          fi
-          echo "Profile UUID: $UUID"
-          echo "UUID=$UUID" >> $CM_ENV
+          PROFILE_PATH=$(find /Users/builder/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -1)
+          echo "Found profile: $PROFILE_PATH"
+          UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 "<key>UUID</key>" | tail -1 | sed 's/.*<string>//;s/<\/string>//')
+          echo "UUID: $UUID"
+          echo "PROFILE_UUID=$UUID" >> $CM_ENV
+          echo "PROFILE_PATH=$PROFILE_PATH" >> $CM_ENV
       - name: Build iOS
         script: |
           KEY_PATH=$(echo "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/@file://')
-          echo "Using UUID: $UUID"
+          echo "UUID from env: $PROFILE_UUID"
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
             -scheme App \
@@ -93,7 +92,7 @@ workflows:
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE="$UUID" \
+            PROVISIONING_PROFILE="$PROFILE_UUID" \
             DEVELOPMENT_TEAM=6L8J9ZP8RL \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$KEY_PATH" \
@@ -107,18 +106,3 @@ workflows:
             -authenticationKeyPath "$KEY_PATH" \
             -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
             -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
-      - name: Find IPA
-        script: |
-          echo "=== Searching for IPA ==="
-          find /Users/builder -name "*.ipa" 2>/dev/null
-          mkdir -p $CM_BUILD_DIR/ipa
-          find /Users/builder -name "*.ipa" -exec cp {} $CM_BUILD_DIR/ipa/ \; 2>/dev/null
-          echo "=== IPA files ==="
-          ls -la $CM_BUILD_DIR/ipa/
-    artifacts:
-      - $CM_BUILD_DIR/ipa/*.ipa
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
-        submit_to_app_store: false
