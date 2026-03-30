@@ -73,9 +73,21 @@ workflows:
         script: npx cap add ios
       - name: Sync iOS
         script: npx cap sync ios
+      - name: Install provisioning profile
+        script: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          for profile in $(find ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles -name "*.mobileprovision" 2>/dev/null); do
+            cp "$profile" ~/Library/MobileDevice/Provisioning\ Profiles/
+          done
+          echo "Profiles from Codemagic:"
+          ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "No profiles found yet"
+          find /Users/builder -name "*.mobileprovision" 2>/dev/null | head -20
       - name: Build iOS
         script: |
           KEY_PATH=$(echo "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/@file://')
+          PROFILE=$(find /Users/builder -name "*.mobileprovision" 2>/dev/null | head -1)
+          echo "Using profile: $PROFILE"
+          cp "$PROFILE" ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || true
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
             -scheme App \
