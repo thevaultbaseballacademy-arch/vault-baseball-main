@@ -37,10 +37,7 @@ workflows:
             -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
             -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
     artifacts:
-       - $CM_BUILD_DIR/ipa/*.ipa
-      - $CM_BUILD_DIR/**/*.ipa
-      - /Users/builder/clone/**/*.ipa
-      - build/ios/ipa/*.ipa
+      - android/app/build/outputs/**/*.aab
     publishing:
       email:
         recipients:
@@ -85,3 +82,43 @@ workflows:
           fi
           echo "Profile UUID: $UUID"
           echo "UUID=$UUID" >> $CM_ENV
+      - name: Build iOS
+        script: |
+          KEY_PATH=$(echo "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/@file://')
+          echo "Using UUID: $UUID"
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -archivePath $CM_BUILD_DIR/App.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            PROVISIONING_PROFILE="$UUID" \
+            DEVELOPMENT_TEAM=6L8J9ZP8RL \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/App.xcarchive \
+            -exportPath $CM_BUILD_DIR/ipa \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
+      - name: Find IPA
+        script: |
+          echo "=== Searching for IPA ==="
+          find /Users/builder -name "*.ipa" 2>/dev/null
+          mkdir -p $CM_BUILD_DIR/ipa
+          find /Users/builder -name "*.ipa" -exec cp {} $CM_BUILD_DIR/ipa/ \; 2>/dev/null
+          echo "=== IPA files ==="
+          ls -la $CM_BUILD_DIR/ipa/
+    artifacts:
+      - $CM_BUILD_DIR/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
