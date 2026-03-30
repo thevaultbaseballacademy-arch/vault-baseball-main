@@ -75,19 +75,14 @@ workflows:
         script: npx cap sync ios
       - name: Install provisioning profile
         script: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          for profile in $(find ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles -name "*.mobileprovision" 2>/dev/null); do
-            cp "$profile" ~/Library/MobileDevice/Provisioning\ Profiles/
-          done
-          echo "Profiles from Codemagic:"
-          ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "No profiles found yet"
-          find /Users/builder -name "*.mobileprovision" 2>/dev/null | head -20
+          PROFILE_PATH="/Users/builder/Library/MobileDevice/Provisioning Profiles/provisioning_profile_tfsn44fv.mobileprovision"
+          UUID=$(security cms -D -i "$PROFILE_PATH" 2>/dev/null | plutil -extract UUID raw - 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
+          echo "Profile UUID: $UUID"
+          echo "UUID=$UUID" >> $CM_ENV
       - name: Build iOS
         script: |
           KEY_PATH=$(echo "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/@file://')
-          PROFILE=$(find /Users/builder -name "*.mobileprovision" 2>/dev/null | head -1)
-          echo "Using profile: $PROFILE"
-          cp "$PROFILE" ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || true
+          echo "Using UUID: $UUID"
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
             -scheme App \
@@ -95,7 +90,7 @@ workflows:
             -archivePath $CM_BUILD_DIR/App.xcarchive \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="Vault OS" \
+            PROVISIONING_PROFILE="$UUID" \
             DEVELOPMENT_TEAM=6L8J9ZP8RL \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$KEY_PATH" \
