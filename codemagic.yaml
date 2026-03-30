@@ -80,11 +80,9 @@ workflows:
           UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 "<key>UUID</key>" | tail -1 | sed 's/.*<string>//;s/<\/string>//')
           echo "UUID: $UUID"
           echo "PROFILE_UUID=$UUID" >> $CM_ENV
-          echo "PROFILE_PATH=$PROFILE_PATH" >> $CM_ENV
       - name: Build iOS
         script: |
           KEY_PATH=$(echo "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/@file://')
-          echo "UUID from env: $PROFILE_UUID"
           xcodebuild archive \
             -project ios/App/App.xcodeproj \
             -scheme App \
@@ -106,3 +104,14 @@ workflows:
             -authenticationKeyPath "$KEY_PATH" \
             -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
             -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
+          echo "=== Finding IPA ==="
+          find /Users/builder -name "*.ipa" 2>/dev/null
+          mkdir -p $CM_BUILD_DIR/ipa
+          find /Users/builder -name "*.ipa" -exec cp {} $CM_BUILD_DIR/ipa/ \; 2>/dev/null || true
+    artifacts:
+      - $CM_BUILD_DIR/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
