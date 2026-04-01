@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.vaultbaseball.os',
   appName: 'VAULT OS',
   webDir: 'dist',
-  // Production mode: NO server block — app uses local bundle
   plugins: {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
@@ -29,11 +28,11 @@ const config: CapacitorConfig = {
     contentInset: 'automatic',
     backgroundColor: '#0d0d0d',
     preferredContentMode: 'mobile',
-    limitsNavigationsToAppBoundDomains: true,
+    limitsNavigationsToAppBoundDomains: false,
     allowsLinkPreview: false,
   },
   android: {
-    allowMixedContent: false,
+    allowMixedContent: true,
     backgroundColor: '#0d0d0d',
     captureInput: true,
     webContentsDebuggingEnabled: false,
