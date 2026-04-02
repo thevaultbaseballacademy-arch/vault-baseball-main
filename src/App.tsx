@@ -219,7 +219,6 @@ const App = () => (
       <SportProvider>
       <TooltipProvider>
         <Toaster />
-        <Sonner />
         <BrowserRouter>
           <AndroidBackButtonHandler />
           <FoundersPricingBanner />
