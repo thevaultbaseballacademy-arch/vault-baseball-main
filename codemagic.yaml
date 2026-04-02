@@ -8,7 +8,7 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
       java: 21
     scripts:
       - name: Install dependencies
@@ -21,6 +21,7 @@ workflows:
           grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
           grep "isChecking" src/hooks/useBiometricAuth.ts && sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
+          sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/pages/Certifications.tsx
           echo "=== Verify capacitor config ==="
           head -3 capacitor.config.ts
           echo "All patches done"
@@ -45,8 +46,8 @@ workflows:
       - name: Build Android AAB
         script: |
           cd android
-          sed -i "s/versionCode [0-9]*/versionCode 5/" app/build.gradle
-          sed -i 's/versionName "[^"]*"/versionName "1.0.4"/' app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode 6/" app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.5"/' app/build.gradle
           ./gradlew bundleRelease \
             -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
             -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
@@ -72,7 +73,7 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
@@ -84,6 +85,7 @@ workflows:
           grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
           grep "isChecking" src/hooks/useBiometricAuth.ts && sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
+          sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/pages/Certifications.tsx
           echo "=== Verify capacitor config ==="
           head -3 capacitor.config.ts
           echo "All patches done"
@@ -117,13 +119,21 @@ workflows:
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" "$PLIST"
           echo "Export compliance set"
-      - name: Configure ATS
+      - name: Configure iOS permissions
         script: |
           PLIST="ios/App/App/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'VAULT OS uses your camera for training videos and coach analysis.'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription 'VAULT OS uses your camera for training videos and coach analysis.'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'VAULT OS uses your microphone during live remote coaching sessions.'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSMicrophoneUsageDescription 'VAULT OS uses your microphone during live remote coaching sessions.'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'VAULT OS accesses your photo library to upload training videos and profile photos.'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSPhotoLibraryUsageDescription 'VAULT OS accesses your photo library to upload training videos and profile photos.'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'VAULT OS uses Face ID for secure fast login.'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSFaceIDUsageDescription 'VAULT OS uses Face ID for secure fast login.'" "$PLIST"
           /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity dict" "$PLIST" 2>/dev/null || true
           /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool true" "$PLIST" 2>/dev/null || true
           /usr/libexec/PlistBuddy -c "Set :NSAppTransportSecurity:NSAllowsArbitraryLoads true" "$PLIST" 2>/dev/null || true
-          echo "ATS configured"
+          echo "iOS permissions configured"
       - name: Install provisioning profile
         script: |
           PROFILE_PATH=$(find /Users/builder/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -1)
