@@ -8,39 +8,22 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
       java: 21
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
-      - name: Patch blank screen fixes
+      - name: Patch all fixes
         script: |
-         cat > capacitor.config.ts << 'CAPEOF'
-          import type { CapacitorConfig } from '@capacitor/cli';
-          const config: CapacitorConfig = {
-            appId: 'com.vaultbaseball.os',
-            appName: 'VAULT OS',
-            webDir: 'dist',
-            server: { androidScheme: 'https', iosScheme: 'app', hostname: 'vaultos' },
-            plugins: {
-              PushNotifications: { presentationOptions: ['badge', 'sound', 'alert'] },
-              NativeBiometric: { useFallback: true },
-              SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: '#0d0d0d', androidScaleType: 'CENTER_CROP', showSpinner: false },
-              StatusBar: { style: 'Dark', backgroundColor: '#0d0d0d' },
-            },
-            ios: { scheme: 'vaultos', contentInset: 'automatic', backgroundColor: '#0d0d0d', preferredContentMode: 'mobile', limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },
-            android: { allowMixedContent: true, backgroundColor: '#0d0d0d', captureInput: true, webContentsDebuggingEnabled: false },
-          };
-          export default config;
-          CAPEOF
+          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { androidScheme: \"https\", iosScheme: \"app\", hostname: \"vaultos\" },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"vaultos\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: true, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
           echo "capacitor.config.ts rewritten"
-          sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
-          sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
+          grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
+          grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
-          sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
-          export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
-          export VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhodmR4a3hhaWF1emlrYXZ0cHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4Njg2ODcsImV4cCI6MjA4MjQ0NDY4N30.ysBpLbWYe8y1wZLkztWltQBjdCfOw_z6U91tpYdPfK8"
-          echo "Patches done"
+          grep "isChecking" src/hooks/useBiometricAuth.ts && sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
+          echo "=== Verify capacitor config ==="
+          head -3 capacitor.config.ts
+          echo "All patches done"
       - name: Build web app
         script: |
           export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
@@ -62,8 +45,8 @@ workflows:
       - name: Build Android AAB
         script: |
           cd android
-          sed -i "s/versionCode [0-9]*/versionCode 4/" app/build.gradle
-          sed -i 's/versionName "[^"]*"/versionName "1.0.3"/' app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode 5/" app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.4"/' app/build.gradle
           ./gradlew bundleRelease \
             -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
             -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
@@ -78,6 +61,7 @@ workflows:
         notify:
           success: true
           failure: true
+
   ios-app-store:
     name: VAULT OS iOS
     max_build_duration: 60
@@ -88,18 +72,21 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
-      - name: Patch blank screen fixes
+      - name: Patch all fixes
         script: |
-          sed -i "s/limitsNavigationsToAppBoundDomains: true/limitsNavigationsToAppBoundDomains: false/" capacitor.config.ts
-          sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
-          sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
+          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { androidScheme: \"https\", iosScheme: \"app\", hostname: \"vaultos\" },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"vaultos\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: true, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
+          echo "capacitor.config.ts rewritten"
+          grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
+          grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
-          sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
-          echo "Patches done"
+          grep "isChecking" src/hooks/useBiometricAuth.ts && sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
+          echo "=== Verify capacitor config ==="
+          head -3 capacitor.config.ts
+          echo "All patches done"
       - name: Build web app
         script: |
           export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
@@ -116,24 +103,7 @@ workflows:
       - name: Add iOS
         script: npx cap add ios
       - name: Sync iOS
-        script: |
-          echo "=== dist contents ==="
-          ls -la dist/
-          npx cap sync ios
-          echo "=== iOS public folder after sync ==="
-          ls -la ios/App/App/public/
-          echo "=== Check index.html in iOS ==="
-          cat ios/App/App/public/index.html | head -5
-      - name: Check bundle
-        script: |
-          echo "=== index.html ==="
-          cat dist/index.html
-          echo "=== JS files ==="
-          ls -la dist/assets/*.js | head -5
-          echo "=== Check for errors in bundle ==="
-          grep -l "undefined\|null is not" dist/assets/*.js | head -3 || echo "No obvious errors"
-          echo "=== Bundle sizes ==="
-          du -sh dist/assets/*.js | sort -rh | head -5
+        script: npx cap sync ios
       - name: Set app icon
         script: |
           ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
