@@ -229,7 +229,7 @@ const Certifications = () => {
   const [user, setUser] = useState<any>(null);
   const [coachName, setCoachName] = useState<string>("");
   const [isCoach, setIsCoach] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
