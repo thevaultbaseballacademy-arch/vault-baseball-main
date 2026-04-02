@@ -6,8 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    iosScheme: 'https',
-    hostname: 'app'
+    iosScheme: 'app',
+    hostname: 'vaultos'
   },
   plugins: {
     PushNotifications: {
@@ -29,7 +29,7 @@ const config: CapacitorConfig = {
     },
   },
   ios: {
-    scheme: 'VAULT OS',
+    scheme: 'vaultos',
     contentInset: 'automatic',
     backgroundColor: '#0d0d0d',
     preferredContentMode: 'mobile',
