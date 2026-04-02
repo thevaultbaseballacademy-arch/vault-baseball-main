@@ -25,7 +25,7 @@ const safeLocalStorageAdapter = {
     try {
       localStorage.setItem(key, value);
     } catch {
-      // Silently ignore — session will not be persisted in restricted contexts
+      // Silently ignore
     }
   },
   removeItem: (key: string): void => {
