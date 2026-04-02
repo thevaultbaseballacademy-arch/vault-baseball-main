@@ -17,7 +17,7 @@ workflows:
         XCODE_SCHEME: App
         BUNDLE_ID: com.vaultbaseball.os
         APP_STORE_APP_ID: $APP_STORE_APP_ID
-      node: v22.11.0
+      node: 22.11.0
 
     scripts:
       - name: Install dependencies
@@ -91,7 +91,7 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: v22.11.0
+      node: 22.11.0
       java: 21
 
     scripts:
