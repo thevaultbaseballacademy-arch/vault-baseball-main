@@ -4,6 +4,11 @@ const config: CapacitorConfig = {
   appId: 'com.vaultbaseball.os',
   appName: 'VAULT OS',
   webDir: 'dist',
+  server: {
+    androidScheme: 'https',
+    iosScheme: 'https',
+    hostname: 'app'
+  },
   plugins: {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
