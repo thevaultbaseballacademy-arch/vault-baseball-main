@@ -27,7 +27,7 @@ export const useSport = () => useContext(SportContext);
 export const SportProvider = ({ children }: { children: ReactNode }) => {
   const [sport, setSportState] = useState<SportType>('baseball');
   const [softballFormat, setSoftballFormatState] = useState<SoftballFormat>('fastpitch');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const loadFromProfile = async (userId: string) => {
     const { data } = await supabase
