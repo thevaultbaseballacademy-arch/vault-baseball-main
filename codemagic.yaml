@@ -6,7 +6,7 @@ workflows:
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: VAULT_APP_STORE_CONNECT
+      app_store_connect: VAULT_OS
 
     environment:
       ios_signing:
