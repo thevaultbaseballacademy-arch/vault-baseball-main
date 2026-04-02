@@ -78,7 +78,7 @@ workflows:
         script: npm install --legacy-peer-deps
       - name: Patch all fixes
         script: |
-          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { androidScheme: \"https\", iosScheme: \"app\", hostname: \"vaultos\" },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"vaultos\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: true, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
+          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { url: \"https://vault-baseball.lovable.app\", cleartext: false },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"App\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: false, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
           echo "capacitor.config.ts rewritten"
           grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
           grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
@@ -117,6 +117,13 @@ workflows:
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST" 2>/dev/null || \
           /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" "$PLIST"
           echo "Export compliance set"
+      - name: Configure ATS
+        script: |
+          PLIST="ios/App/App/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity dict" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool true" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Set :NSAppTransportSecurity:NSAllowsArbitraryLoads true" "$PLIST" 2>/dev/null || true
+          echo "ATS configured"
       - name: Install provisioning profile
         script: |
           PROFILE_PATH=$(find /Users/builder/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -1)
