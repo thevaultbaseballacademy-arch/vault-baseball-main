@@ -1,90 +1,8 @@
 workflows:
-
-  ios-app-store:
-    name: VAULT OS — iOS App Store Build
-    max_build_duration: 60
-    instance_type: mac_mini_m2
-
-    integrations:
-      app_store_connect: VAULT_OS
-
-    environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.vaultbaseball.os
-      vars:
-        XCODE_WORKSPACE: ios/App/App.xcworkspace
-        XCODE_SCHEME: App
-        BUNDLE_ID: com.vaultbaseball.os
-        APP_STORE_APP_ID: $APP_STORE_APP_ID
-      node: 22.11.0
-
-    scripts:
-      - name: Install dependencies
-        script: npm ci
-
-      - name: Patch blank screen fixes
-        script: |
-          sed -i "s/limitsNavigationsToAppBoundDomains: true/limitsNavigationsToAppBoundDomains: false/" capacitor.config.ts
-          sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
-          sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
-          sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
-          sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
-          echo "Patches done"
-
-      - name: Build web app
-        script: |
-          export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
-          export VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhodmR4a3hhaWF1emlrYXZ0cHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4Njg2ODcsImV4cCI6MjA4MjQ0NDY4N30.ysBpLbWYe8y1wZLkztWltQBjdCfOw_z6U91tpYdPfK8"
-          npm run build:prod
-
-      - name: Install Capacitor CLI
-        script: npm install -g @capacitor/cli
-
-      - name: Add iOS platform
-        script: |
-          if [ ! -d "ios" ]; then
-            npx cap add ios
-          fi
-
-      - name: Sync Capacitor
-        script: npx cap sync ios
-
-      - name: Set app icon
-        script: |
-          mkdir -p ios/App/App/Assets.xcassets/AppIcon.appiconset
-          cp public/icons/icon-1024x1024.png ios/App/App/Assets.xcassets/AppIcon.appiconset/icon-1024x1024.png
-          echo '{"images":[{"filename":"icon-1024x1024.png","idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}' > ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json
-
-      - name: Install CocoaPods
-        script: cd ios/App && pod install
-
-      - name: Set build number
-        script: |
-          BUILD_NUMBER=$(($(app-store-connect get-latest-build-number "$APP_STORE_APP_ID") + 1))
-          cd ios/App && agvtool new-version -all $BUILD_NUMBER
-
-      - name: Build iOS app
-        script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
-
-    artifacts:
-      - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
-        submit_to_app_store: false
-
-  android-google-play:
-    name: VAULT OS — Android Google Play Build
+  android-release:
+    name: VAULT OS Android
     max_build_duration: 60
     instance_type: linux_x2
-
     environment:
       android_signing:
         - vault_keystore
@@ -92,11 +10,70 @@ workflows:
         PACKAGE_NAME: com.vaultbaseball.os
       node: 22.11.0
       java: 21
-
     scripts:
       - name: Install dependencies
-        script: npm ci
-
+        script: npm install --legacy-peer-deps
+      - name: Patch blank screen fixes
+        script: |
+          sed -i "s/limitsNavigationsToAppBoundDomains: true/limitsNavigationsToAppBoundDomains: false/" capacitor.config.ts
+          sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
+          sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
+          sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
+          sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
+          export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
+          export VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhodmR4a3hhaWF1emlrYXZ0cHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4Njg2ODcsImV4cCI6MjA4MjQ0NDY4N30.ysBpLbWYe8y1wZLkztWltQBjdCfOw_z6U91tpYdPfK8"
+          echo "Patches done"
+      - name: Build web app
+        script: |
+          export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
+          export VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhodmR4a3hhaWF1emlrYXZ0cHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4Njg2ODcsImV4cCI6MjA4MjQ0NDY4N30.ysBpLbWYe8y1wZLkztWltQBjdCfOw_z6U91tpYdPfK8"
+          CI=false npm run build
+      - name: Install Capacitor
+        script: npm install -g @capacitor/cli
+      - name: Add Android
+        script: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+      - name: Sync Capacitor
+        script: npx cap sync android
+      - name: Set Java version
+        script: |
+          export JAVA_HOME=$CM_JAVA_HOME
+          java -version
+      - name: Build Android AAB
+        script: |
+          cd android
+          sed -i "s/versionCode [0-9]*/versionCode 4/" app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.3"/' app/build.gradle
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - Emejia2291@gmail.com
+        notify:
+          success: true
+          failure: true
+  ios-app-store:
+    name: VAULT OS iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: VAULT_OS
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.vaultbaseball.os
+      node: 22.11.0
+    scripts:
+      - name: Install dependencies
+        script: npm install --legacy-peer-deps
       - name: Patch blank screen fixes
         script: |
           sed -i "s/limitsNavigationsToAppBoundDomains: true/limitsNavigationsToAppBoundDomains: false/" capacitor.config.ts
@@ -105,51 +82,73 @@ workflows:
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
           sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
           echo "Patches done"
-
       - name: Build web app
         script: |
           export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
           export VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhodmR4a3hhaWF1emlrYXZ0cHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4Njg2ODcsImV4cCI6MjA4MjQ0NDY4N30.ysBpLbWYe8y1wZLkztWltQBjdCfOw_z6U91tpYdPfK8"
-          npm run build:prod
-
-      - name: Install Capacitor CLI
+          CI=false npm run build
+      - name: Install Capacitor
         script: npm install -g @capacitor/cli
-
-      - name: Add Android platform
+      - name: Create dist if missing
         script: |
-          if [ ! -d "android" ]; then
-            npx cap add android
+          if [ ! -d "dist" ]; then
+            mkdir -p dist
+            echo "<html><body></body></html>" > dist/index.html
           fi
-
-      - name: Sync Capacitor
-        script: npx cap sync android
-
-      - name: Copy Android config files
+      - name: Add iOS
+        script: npx cap add ios
+      - name: Sync iOS
+        script: npx cap sync ios
+      - name: Set app icon
         script: |
-          cp android-config/network_security_config.xml android/app/src/main/res/xml/
-          mkdir -p android/app/src/main/res/drawable
-          cp android-config/splash.xml android/app/src/main/res/drawable/
-          cp android-config/styles.xml android/app/src/main/res/values/
-
-      - name: Set version
+          ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+          mkdir -p "$ICON_DIR"
+          cp public/icons/icon-1024x1024.png "$ICON_DIR/icon-1024x1024.png"
+          echo '{"images":[{"filename":"icon-1024x1024.png","idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}' > "$ICON_DIR/Contents.json"
+          echo "Icon set"
+      - name: Set export compliance
         script: |
-          cd android
-          sed -i "s/versionCode [0-9]*/versionCode 4/" app/build.gradle
-          sed -i 's/versionName "[^"]*"/versionName "1.0.3"/' app/build.gradle
-
-      - name: Build Android AAB
+          PLIST="ios/App/App/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" "$PLIST"
+          echo "Export compliance set"
+      - name: Install provisioning profile
         script: |
-          cd android
-          ./gradlew bundleRelease
-
+          PROFILE_PATH=$(find /Users/builder/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -1)
+          echo "Found profile: $PROFILE_PATH"
+          UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 "<key>UUID</key>" | tail -1 | sed 's/.*<string>//;s/<\/string>//')
+          echo "UUID: $UUID"
+          echo "PROFILE_UUID=$UUID" >> $CM_ENV
+      - name: Build iOS
+        script: |
+          KEY_PATH=$(echo "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/@file://')
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -archivePath $CM_BUILD_DIR/App.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            PROVISIONING_PROFILE="$PROFILE_UUID" \
+            DEVELOPMENT_TEAM=6L8J9ZP8RL \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/App.xcarchive \
+            -exportPath $CM_BUILD_DIR/ipa \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
+          mkdir -p $CM_BUILD_DIR/ipa
+          find /Users/builder -name "*.ipa" -exec cp {} $CM_BUILD_DIR/ipa/ \; 2>/dev/null || true
     artifacts:
-      - android/app/build/outputs/**/*.aab
-      - android/app/build/outputs/**/mapping.txt
-
+      - $CM_BUILD_DIR/ipa/*.ipa
     publishing:
-      email:
-        recipients:
-          - Emejia2291@gmail.com
-        notify:
-          success: true
-          failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
