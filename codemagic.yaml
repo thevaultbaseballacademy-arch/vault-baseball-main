@@ -17,20 +17,20 @@ workflows:
         XCODE_SCHEME: App
         BUNDLE_ID: com.vaultbaseball.os
         APP_STORE_APP_ID: $APP_STORE_APP_ID
-      node: 22.11.0
+      node: v22.11.0
 
     scripts:
       - name: Install dependencies
         script: npm ci
 
-      - name: Patch critical files
+      - name: Patch blank screen fixes
         script: |
           sed -i "s/limitsNavigationsToAppBoundDomains: true/limitsNavigationsToAppBoundDomains: false/" capacitor.config.ts
           sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
           sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
           sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
-          echo "Patches applied"
+          echo "Patches done"
 
       - name: Build web app
         script: |
@@ -55,7 +55,6 @@ workflows:
           mkdir -p ios/App/App/Assets.xcassets/AppIcon.appiconset
           cp public/icons/icon-1024x1024.png ios/App/App/Assets.xcassets/AppIcon.appiconset/icon-1024x1024.png
           echo '{"images":[{"filename":"icon-1024x1024.png","idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}' > ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json
-          echo "Icon set"
 
       - name: Install CocoaPods
         script: cd ios/App && pod install
@@ -91,21 +90,21 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
       java: 21
 
     scripts:
       - name: Install dependencies
         script: npm ci
 
-      - name: Patch critical files
+      - name: Patch blank screen fixes
         script: |
           sed -i "s/limitsNavigationsToAppBoundDomains: true/limitsNavigationsToAppBoundDomains: false/" capacitor.config.ts
           sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
           sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
           sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
-          echo "Patches applied"
+          echo "Patches done"
 
       - name: Build web app
         script: |
