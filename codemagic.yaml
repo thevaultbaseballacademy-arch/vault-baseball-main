@@ -97,7 +97,7 @@ workflows:
           fi
       - name: Add iOS
         script: npx cap add ios
-            - name: Sync iOS
+      - name: Sync iOS
         script: |
           echo "=== Checking dist folder ==="
           ls -la dist/
