@@ -99,13 +99,13 @@ workflows:
         script: npx cap add ios
       - name: Sync iOS
         script: |
-          echo "=== Checking dist folder ==="
+          echo "=== dist contents ==="
           ls -la dist/
-          echo "=== dist/index.html ==="
-          cat dist/index.html
           npx cap sync ios
-          echo "=== Checking iOS public folder ==="
-          ls -la ios/App/App/public/ | head -10
+          echo "=== iOS public folder after sync ==="
+          ls -la ios/App/App/public/
+          echo "=== Check index.html in iOS ==="
+          cat ios/App/App/public/index.html | head -5
       - name: Check bundle
         script: |
           echo "=== index.html ==="
