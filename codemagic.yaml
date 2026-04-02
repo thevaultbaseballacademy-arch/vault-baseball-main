@@ -15,7 +15,7 @@ workflows:
         script: npm install --legacy-peer-deps
       - name: Patch blank screen fixes
         script: |
-                    cat > capacitor.config.ts << 'CAPEOF'
+         cat > capacitor.config.ts << 'CAPEOF'
           import type { CapacitorConfig } from '@capacitor/cli';
           const config: CapacitorConfig = {
             appId: 'com.vaultbaseball.os',
