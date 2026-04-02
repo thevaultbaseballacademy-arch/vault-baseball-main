@@ -106,6 +106,16 @@ workflows:
           npx cap sync ios
           echo "=== Checking iOS public folder ==="
           ls -la ios/App/App/public/ | head -10
+      - name: Check bundle
+        script: |
+          echo "=== index.html ==="
+          cat dist/index.html
+          echo "=== JS files ==="
+          ls -la dist/assets/*.js | head -5
+          echo "=== Check for errors in bundle ==="
+          grep -l "undefined\|null is not" dist/assets/*.js | head -3 || echo "No obvious errors"
+          echo "=== Bundle sizes ==="
+          du -sh dist/assets/*.js | sort -rh | head -5
       - name: Set app icon
         script: |
           ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
