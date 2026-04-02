@@ -30,17 +30,21 @@ export const SportProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
 
   const loadFromProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('sport_type, softball_format')
-      .eq('user_id', userId)
-      .single();
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('sport_type, softball_format')
+        .eq('user_id', userId)
+        .single();
 
-    if (data?.sport_type) {
-      setSportState(data.sport_type as SportType);
-    }
-    if (data?.softball_format) {
-      setSoftballFormatState(data.softball_format as SoftballFormat);
+      if (data?.sport_type) {
+        setSportState(data.sport_type as SportType);
+      }
+      if (data?.softball_format) {
+        setSoftballFormatState(data.softball_format as SoftballFormat);
+      }
+    } catch (err) {
+      console.error('Error loading sport preference:', err);
     }
   };
 
@@ -73,30 +77,32 @@ export const SportProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const setSport = async (newSport: SportType) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ sport_type: newSport } as any)
-        .eq('user_id', session.user.id);
-
-      if (!error) {
-        setSportState(newSport);
+    setSportState(newSport);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase
+          .from('profiles')
+          .update({ sport_type: newSport } as any)
+          .eq('user_id', session.user.id);
       }
+    } catch (err) {
+      console.error('Error saving sport preference:', err);
     }
   };
 
   const setSoftballFormat = async (format: SoftballFormat) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ softball_format: format } as any)
-        .eq('user_id', session.user.id);
-
-      if (!error) {
-        setSoftballFormatState(format);
+    setSoftballFormatState(format);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase
+          .from('profiles')
+          .update({ softball_format: format } as any)
+          .eq('user_id', session.user.id);
       }
+    } catch (err) {
+      console.error('Error saving softball format:', err);
     }
   };
 
