@@ -5,9 +5,8 @@ const config: CapacitorConfig = {
   appName: 'VAULT OS',
   webDir: 'dist',
   server: {
-    androidScheme: 'https',
-    iosScheme: 'app',
-    hostname: 'vaultos'
+    url: 'https://vault-baseball.lovable.app',
+    cleartext: false
   },
   plugins: {
     PushNotifications: {
@@ -29,7 +28,7 @@ const config: CapacitorConfig = {
     },
   },
   ios: {
-    scheme: 'vaultos',
+    scheme: 'App',
     contentInset: 'automatic',
     backgroundColor: '#0d0d0d',
     preferredContentMode: 'mobile',
@@ -37,7 +36,7 @@ const config: CapacitorConfig = {
     allowsLinkPreview: false,
   },
   android: {
-    allowMixedContent: true,
+    allowMixedContent: false,
     backgroundColor: '#0d0d0d',
     captureInput: true,
     webContentsDebuggingEnabled: false,
