@@ -7,7 +7,6 @@ import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { SportProvider } from "@/contexts/SportContext";
 import { FoundersPricingBanner } from "@/components/FoundersPricingBanner";
 import SessionExpiryHandler from "@/components/auth/SessionExpiryHandler";
-import BiometricGate from "@/components/auth/BiometricGate";
 import TrialProtectedRoute from "@/components/TrialProtectedRoute";
 import RoleGuard from "@/components/RoleGuard";
 import { Loader2 } from "lucide-react";
@@ -222,7 +221,6 @@ const App = () => (
           <AndroidBackButtonHandler />
           <FoundersPricingBanner />
           <SessionExpiryHandler />
-          <BiometricGate />
           <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
