@@ -97,8 +97,15 @@ workflows:
           fi
       - name: Add iOS
         script: npx cap add ios
-      - name: Sync iOS
-        script: npx cap sync ios
+            - name: Sync iOS
+        script: |
+          echo "=== Checking dist folder ==="
+          ls -la dist/
+          echo "=== dist/index.html ==="
+          cat dist/index.html
+          npx cap sync ios
+          echo "=== Checking iOS public folder ==="
+          ls -la ios/App/App/public/ | head -10
       - name: Set app icon
         script: |
           ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
