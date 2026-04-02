@@ -15,7 +15,25 @@ workflows:
         script: npm install --legacy-peer-deps
       - name: Patch blank screen fixes
         script: |
-          sed -i "s/limitsNavigationsToAppBoundDomains: true/limitsNavigationsToAppBoundDomains: false/" capacitor.config.ts
+                    cat > capacitor.config.ts << 'CAPEOF'
+          import type { CapacitorConfig } from '@capacitor/cli';
+          const config: CapacitorConfig = {
+            appId: 'com.vaultbaseball.os',
+            appName: 'VAULT OS',
+            webDir: 'dist',
+            server: { androidScheme: 'https', iosScheme: 'app', hostname: 'vaultos' },
+            plugins: {
+              PushNotifications: { presentationOptions: ['badge', 'sound', 'alert'] },
+              NativeBiometric: { useFallback: true },
+              SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: '#0d0d0d', androidScaleType: 'CENTER_CROP', showSpinner: false },
+              StatusBar: { style: 'Dark', backgroundColor: '#0d0d0d' },
+            },
+            ios: { scheme: 'vaultos', contentInset: 'automatic', backgroundColor: '#0d0d0d', preferredContentMode: 'mobile', limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },
+            android: { allowMixedContent: true, backgroundColor: '#0d0d0d', captureInput: true, webContentsDebuggingEnabled: false },
+          };
+          export default config;
+          CAPEOF
+          echo "capacitor.config.ts rewritten"
           sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
           sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
