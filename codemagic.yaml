@@ -1,129 +1,124 @@
 workflows:
-  android-release:
-    name: VAULT OS Android
-    max_build_duration: 60
-    instance_type: linux_x2
-    environment:
-      android_signing:
-        - vault_keystore
-      vars:
-        PACKAGE_NAME: com.vaultbaseball.os
-      node: 22.11.0
-      java: 21
-    scripts:
-      - name: Install dependencies
-        script: npm install --legacy-peer-deps
-      - name: Build web app
-        script: CI=false npm run build
-      - name: Install Capacitor
-        script: npm install -g @capacitor/cli
-      - name: Add Android
-        script: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          fi
-      - name: Sync Capacitor
-        script: npx cap sync android
-      - name: Set Java version
-        script: |
-          export JAVA_HOME=$CM_JAVA_HOME
-          java -version
-      - name: Build Android AAB
-        script: |
-          cd android
-          # Bump version code to 2
-          sed -i 's/versionCode 1/versionCode 2/' app/build.gradle
-          sed -i 's/versionName "1.0"/versionName "1.0.1"/' app/build.gradle
-          ./gradlew bundleRelease \
-            -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
-            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
-            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
-            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
-    artifacts:
-      - android/app/build/outputs/**/*.aab
-    publishing:
-      email:
-        recipients:
-          - emejia2291@gmail.com
-        notify:
-          success: true
-          failure: true
-  ios-app-store:
-    name: VAULT OS iOS
-    max_build_duration: 60
-    instance_type: mac_mini_m2
-    integrations:
-      app_store_connect: VAULT_OS
-    environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.vaultbaseball.os
-      node: 22.11.0
-    scripts:
-      - name: Install dependencies
-        script: npm install --legacy-peer-deps
-      - name: Build web app
-        script: CI=false npm run build
-      - name: Install Capacitor
-        script: npm install -g @capacitor/cli
-      - name: Create dist if missing
-        script: |
-          if [ ! -d "dist" ]; then
-            mkdir -p dist
-            echo "<html><body></body></html>" > dist/index.html
-          fi
-      - name: Add iOS
-        script: npx cap add ios
-      - name: Sync iOS
+android-release:
+name: VAULT OS Android
+max_build_duration: 60
+instance_type: linux_x2
+environment:
+android_signing:
+- vault_keystore
+vars:
+PACKAGE_NAME: com.vaultbaseball.os
+node: 22.11.0
+java: 21
+scripts:
+- name: Install dependencies
+script: npm install --legacy-peer-deps
+- name: Build web app
+script: CI=false npm run build
+- name: Install Capacitor
+script: npm install -g @capacitor/cli
+- name: Add Android
+script: |
+if [ ! -d "android" ]; then
+npx cap add android
+fi
+- name: Sync Capacitor
+script: npx cap sync android
+- name: Set Java version
+script: |
+export JAVA_HOME=$CM_JAVA_HOME
+java -version
+- name: Build Android AAB
+script: |
+cd android
+sed -i 's/versionCode 1/versionCode 2/' app/build.gradle
+sed -i 's/versionName "1.0"/versionName "1.0.1"/' app/build.gradle
+./gradlew bundleRelease \
+-Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
+-Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+-Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+-Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+artifacts:
+- android/app/build/outputs/**/*.aab
+publishing:
+email:
+recipients:
+- emejia2291@gmail.com
+notify:
+success: true
+failure: true
+ios-app-store:
+name: VAULT OS iOS
+max_build_duration: 60
+instance_type: mac_mini_m2
+integrations:
+app_store_connect: VAULT_OS
+environment:
+ios_signing:
+distribution_type: app_store
+bundle_identifier: com.vaultbaseball.os
+node: 22.11.0
+scripts:
+- name: Install dependencies
+script: npm install --legacy-peer-deps
+- name: Build web app
+script: CI=false npm run build
+- name: Install Capacitor
+script: npm install -g @capacitor/cli
+- name: Create dist if missing
+script: |
+if [ ! -d "dist" ]; then
+mkdir -p dist
+echo "<html><body></body></html>" > dist/index.html
+fi
+- name: Add iOS
+script: npx cap add ios
+- name: Sync iOS
+script: npx cap sync ios
 - name: Set app icon
 script: |
 mkdir -p ios/App/App/Assets.xcassets/AppIcon.appiconset
 curl -o ios/App/App/Assets.xcassets/AppIcon.appiconset/icon-1024x1024.png "https://raw.githubusercontent.com/thevaultbaseballacademy-arch/vault-baseball-main/main/public/icons/icon-1024x1024.png"
 echo '{"images":[{"filename":"icon-1024x1024.png","idiom":"universal","platform":"ios","size":"1024x1024"}],"info":{"author":"xcode","version":1}}' > ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json
 echo "Icon set done"
-else
-echo "Icon download failed — using default"
-fi
-        script: npx cap sync ios
-      - name: Install provisioning profile
-        script: |
-          PROFILE_PATH=$(find /Users/builder/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -1)
-          echo "Found profile: $PROFILE_PATH"
-          UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 "<key>UUID</key>" | tail -1 | sed 's/.*<string>//;s/<\/string>//')
-          echo "UUID: $UUID"
-          echo "PROFILE_UUID=$UUID" >> $CM_ENV
-      - name: Build iOS
-        script: |
-          KEY_PATH=$(echo "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/@file://')
-          xcodebuild archive \
-            -project ios/App/App.xcodeproj \
-            -scheme App \
-            -configuration Release \
-            -archivePath $CM_BUILD_DIR/App.xcarchive \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE="$PROFILE_UUID" \
-            DEVELOPMENT_TEAM=6L8J9ZP8RL \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" \
-            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
-            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
-          xcodebuild -exportArchive \
-            -archivePath $CM_BUILD_DIR/App.xcarchive \
-            -exportPath $CM_BUILD_DIR/ipa \
-            -exportOptionsPlist ExportOptions.plist \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" \
-            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
-            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
-          echo "=== Finding IPA ==="
-          find /Users/builder -name "*.ipa" 2>/dev/null
-          mkdir -p $CM_BUILD_DIR/ipa
-          find /Users/builder -name "*.ipa" -exec cp {} $CM_BUILD_DIR/ipa/ \; 2>/dev/null || true
-    artifacts:
-      - $CM_BUILD_DIR/ipa/*.ipa
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
-        submit_to_app_store: false
+- name: Install provisioning profile
+script: |
+PROFILE_PATH=$(find /Users/builder/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -1)
+echo "Found profile: $PROFILE_PATH"
+UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 "<key>UUID</key>" | tail -1 | sed 's/.*<string>//;s/<\/string>//')
+echo "UUID: $UUID"
+echo "PROFILE_UUID=$UUID" >> $CM_ENV
+- name: Build iOS
+script: |
+KEY_PATH=$(echo "$APP_STORE_CONNECT_PRIVATE_KEY" | sed 's/@file://')
+xcodebuild archive \
+-project ios/App/App.xcodeproj \
+-scheme App \
+-configuration Release \
+-archivePath $CM_BUILD_DIR/App.xcarchive \
+CODE_SIGN_STYLE=Manual \
+CODE_SIGN_IDENTITY="iPhone Distribution" \
+PROVISIONING_PROFILE="$PROFILE_UUID" \
+DEVELOPMENT_TEAM=6L8J9ZP8RL \
+-allowProvisioningUpdates \
+-authenticationKeyPath "$KEY_PATH" \
+-authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+-authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
+xcodebuild -exportArchive \
+-archivePath $CM_BUILD_DIR/App.xcarchive \
+-exportPath $CM_BUILD_DIR/ipa \
+-exportOptionsPlist ExportOptions.plist \
+-allowProvisioningUpdates \
+-authenticationKeyPath "$KEY_PATH" \
+-authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+-authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
+find /Users/builder -name "*.ipa" 2>/dev/null
+mkdir -p $CM_BUILD_DIR/ipa
+find /Users/builder -name "*.ipa" -exec cp {} $CM_BUILD_DIR/ipa/ \; 2>/dev/null || true
+artifacts:
+- $CM_BUILD_DIR/ipa/*.ipa
+publishing:
+app_store_connect:
+auth: integration
+submit_to_testflight: true
+submit_to_app_store: false
