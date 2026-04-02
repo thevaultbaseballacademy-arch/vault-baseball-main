@@ -30,7 +30,7 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>(null);
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [hasTeamAccess, setHasTeamAccess] = useState(false);
 
   // Use refs to avoid stale closures in interval
