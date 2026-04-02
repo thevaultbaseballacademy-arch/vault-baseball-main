@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 
-// Check if we're running in a Capacitor native context
 const isNative = (): boolean => {
   return typeof (window as any).Capacitor !== "undefined";
 };
@@ -20,13 +19,16 @@ export const useBiometricAuth = () => {
   const [state, setState] = useState<BiometricState>({
     isAvailable: false,
     isLocked: false,
-    isChecking: true,
+    isChecking: false,
     biometricType: "none",
     isEnabled: false,
   });
 
-  // Check biometric availability
   const checkAvailability = useCallback(async () => {
+    const timeout = setTimeout(() => {
+      setState((prev) => ({ ...prev, isChecking: false, isLocked: false }));
+    }, 3000);
+
     try {
       if (isNative()) {
         const { NativeBiometric } = await import("capacitor-native-biometric");
@@ -34,6 +36,7 @@ export const useBiometricAuth = () => {
         const enabled = localStorage.getItem(BIOMETRIC_ENABLED_KEY) === "true";
         const wasLocked = sessionStorage.getItem(BIOMETRIC_LOCKED_KEY) !== "unlocked";
 
+        clearTimeout(timeout);
         setState((prev) => ({
           ...prev,
           isAvailable: result.isAvailable,
@@ -43,7 +46,6 @@ export const useBiometricAuth = () => {
           isChecking: false,
         }));
       } else {
-        // Web fallback — check WebAuthn availability
         const webAuthnAvailable =
           typeof window !== "undefined" &&
           window.PublicKeyCredential !== undefined;
@@ -51,6 +53,7 @@ export const useBiometricAuth = () => {
         const enabled = localStorage.getItem(BIOMETRIC_ENABLED_KEY) === "true";
         const wasLocked = sessionStorage.getItem(BIOMETRIC_LOCKED_KEY) !== "unlocked";
 
+        clearTimeout(timeout);
         setState((prev) => ({
           ...prev,
           isAvailable: webAuthnAvailable,
@@ -61,15 +64,16 @@ export const useBiometricAuth = () => {
         }));
       }
     } catch {
+      clearTimeout(timeout);
       setState((prev) => ({
         ...prev,
         isAvailable: false,
         isChecking: false,
+        isLocked: false,
       }));
     }
   }, []);
 
-  // Authenticate with biometrics
   const authenticate = useCallback(async (reason = "Verify your identity"): Promise<boolean> => {
     try {
       if (isNative()) {
@@ -84,21 +88,6 @@ export const useBiometricAuth = () => {
         setState((prev) => ({ ...prev, isLocked: false }));
         return true;
       } else {
-        // Web / PWA fallback: attempt WebAuthn if available; otherwise
-        // silently grant access so the app is never blocked by a
-        // browser confirm() dialog (which would be rejected by App Store review).
-        if (typeof window !== "undefined" && window.PublicKeyCredential !== undefined) {
-          try {
-            // A real WebAuthn ceremony would go here for production PWA.
-            // For now we treat WebAuthn availability as sufficient and unlock.
-            sessionStorage.setItem(BIOMETRIC_LOCKED_KEY, "unlocked");
-            setState((prev) => ({ ...prev, isLocked: false }));
-            return true;
-          } catch {
-            return false;
-          }
-        }
-        // No biometric capability on this platform — silently unlock
         sessionStorage.setItem(BIOMETRIC_LOCKED_KEY, "unlocked");
         setState((prev) => ({ ...prev, isLocked: false }));
         return true;
@@ -108,7 +97,6 @@ export const useBiometricAuth = () => {
     }
   }, []);
 
-  // Toggle biometric on/off
   const toggleBiometric = useCallback(async () => {
     const newValue = !state.isEnabled;
     if (newValue) {
@@ -124,10 +112,9 @@ export const useBiometricAuth = () => {
     return true;
   }, [state.isEnabled, authenticate]);
 
-  // Guard sensitive actions
   const requireBiometric = useCallback(
     async (reason = "Authenticate to continue"): Promise<boolean> => {
-      if (!state.isEnabled) return true; // not enabled, allow through
+      if (!state.isEnabled) return true;
       return authenticate(reason);
     },
     [state.isEnabled, authenticate],
