@@ -19,7 +19,7 @@ const SportContext = createContext<SportContextType>({
   softballFormat: 'fastpitch',
   setSport: async () => {},
   setSoftballFormat: async () => {},
-  loading: true,
+  loading: false,
 });
 
 export const useSport = () => useContext(SportContext);
