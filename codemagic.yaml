@@ -75,6 +75,33 @@ workflows:
       - name: Add iOS
         script: npx cap add ios
       - name: Sync iOS
+      - name: Set app icon
+script: |
+ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+mkdir -p "$ICON_DIR"
+curl -o /tmp/appicon.png "https://raw.githubusercontent.com/thevaultbaseballacademy-arch/vault-baseball-main/main/public/icons/icon-1024x1024.png" 2>/dev/null
+if [ -f /tmp/appicon.png ]; then
+cp /tmp/appicon.png "$ICON_DIR/icon-1024x1024.png"
+cat > "$ICON_DIR/Contents.json" << 'ICONJSON'
+{
+"images": [
+{
+"filename": "icon-1024x1024.png",
+"idiom": "universal",
+"platform": "ios",
+"size": "1024x1024"
+}
+],
+"info": {
+"author": "xcode",
+"version": 1
+}
+}
+ICONJSON
+echo "✓ App icon set"
+else
+echo "Icon download failed — using default"
+fi
         script: npx cap sync ios
       - name: Install provisioning profile
         script: |
