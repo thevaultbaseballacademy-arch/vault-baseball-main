@@ -8,14 +8,14 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: v22.11.0
+      node: 22.11.0
       java: 21
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
       - name: Patch all fixes
         script: |
-          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { url: \"https://vault-baseball.lovable.app\", cleartext: false },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"App\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: false, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
+          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { androidScheme: \"https\", iosScheme: \"app\", hostname: \"vaultos\" },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"App\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: false, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
           echo "capacitor.config.ts rewritten"
           grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
           grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
@@ -46,8 +46,8 @@ workflows:
       - name: Build Android AAB
         script: |
           cd android
-          sed -i "s/versionCode [0-9]*/versionCode 6/" app/build.gradle
-          sed -i 's/versionName "[^"]*"/versionName "1.0.5"/' app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode 7/" app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.6"/' app/build.gradle
           ./gradlew bundleRelease \
             -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
             -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
@@ -73,13 +73,13 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.vaultbaseball.os
-      node: v22.11.0
+      node: 22.11.0
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
       - name: Patch all fixes
         script: |
-          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { url: \"https://vault-baseball.lovable.app\", cleartext: false },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"App\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: false, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
+          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { androidScheme: \"https\", iosScheme: \"app\", hostname: \"vaultos\" },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"App\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: false, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
           echo "capacitor.config.ts rewritten"
           grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
           grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
