@@ -8,48 +8,13 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
       java: 21
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
       - name: Patch all fixes
-        script: |
-          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { androidScheme: \"https\", iosScheme: \"app\", hostname: \"vaultos\" },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"App\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: false, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
-          echo "capacitor.config.ts rewritten"
-          python3 -c "open('src/components/ui/sonner.tsx','w').write('import { Toaster as Sonner, toast } from \"sonner\";\ntype ToasterProps = React.ComponentProps<typeof Sonner>;\nconst Toaster = ({ ...props }: ToasterProps) => {\n  return (\n    <Sonner\n      theme=\"dark\"\n      className=\"toaster group\"\n      toastOptions={{\n        classNames: {\n          toast: \"group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg\",\n          description: \"group-[.toast]:text-muted-foreground\",\n          actionButton: \"group-[.toast]:bg-primary group-[.toast]:text-primary-foreground\",\n          cancelButton: \"group-[.toast]:bg-muted group-[.toast]:text-muted-foreground\",\n        },\n      }}\n      {...props}\n    />\n  );\n};\nexport { Toaster, toast };\n')"
-          echo "sonner.tsx patched"
-          python3 -c "
-import re
-content = open('index.html').read()
-content = re.sub(r'<link rel=\"preconnect\" href=\"https://fonts\.googleapis\.com\"[^>]*/>\s*', '', content)
-content = re.sub(r'<link rel=\"preconnect\" href=\"https://fonts\.gstatic\.com\"[^>]*/>\s*', '', content)
-content = re.sub(r'<link href=\"https://fonts\.googleapis\.com[^>]*/>\s*', '', content)
-open('index.html', 'w').write(content)
-print('index.html Google Fonts removed')
-"
-          python3 -c "
-content = open('src/App.tsx').read()
-content = content.replace('import { Toaster as Sonner } from \"@/components/ui/sonner\";', '')
-content = content.replace('import { Toaster as Sonner } from \"@/components/ui/sonner\"', '')
-content = content.replace('        <Sonner />', '')
-content = content.replace('        <Sonner/>', '')
-open('src/App.tsx', 'w').write(content)
-print('App.tsx Sonner removed')
-"
-          grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
-          grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
-          sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
-          grep "isChecking" src/hooks/useBiometricAuth.ts && sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
-          echo "=== Verify capacitor config ==="
-          head -3 capacitor.config.ts
-          echo "=== Verify sonner ==="
-          head -1 src/components/ui/sonner.tsx
-          echo "=== Verify index.html ==="
-          grep -c "googleapis" index.html || echo "0 googleapis references - clean"
-          echo "=== Verify App.tsx ==="
-          grep -c "Sonner" src/App.tsx || echo "0 Sonner references - clean"
-          echo "All patches done"
+        script: python3 patch.py
       - name: Build web app
         script: |
           export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
@@ -87,6 +52,7 @@ print('App.tsx Sonner removed')
         notify:
           success: true
           failure: true
+
   ios-app-store:
     name: VAULT OS iOS
     max_build_duration: 60
@@ -97,47 +63,12 @@ print('App.tsx Sonner removed')
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
       - name: Patch all fixes
-        script: |
-          python3 -c "open('capacitor.config.ts','w').write('import type { CapacitorConfig } from \"@capacitor/cli\";\nconst config: CapacitorConfig = {\n  appId: \"com.vaultbaseball.os\",\n  appName: \"VAULT OS\",\n  webDir: \"dist\",\n  server: { androidScheme: \"https\", iosScheme: \"app\", hostname: \"vaultos\" },\n  plugins: {\n    PushNotifications: { presentationOptions: [\"badge\", \"sound\", \"alert\"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: \"#0d0d0d\", androidScaleType: \"CENTER_CROP\", showSpinner: false },\n    StatusBar: { style: \"Dark\", backgroundColor: \"#0d0d0d\" },\n  },\n  ios: { scheme: \"App\", contentInset: \"automatic\", backgroundColor: \"#0d0d0d\", preferredContentMode: \"mobile\", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: false, backgroundColor: \"#0d0d0d\", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')"
-          echo "capacitor.config.ts rewritten"
-          python3 -c "open('src/components/ui/sonner.tsx','w').write('import { Toaster as Sonner, toast } from \"sonner\";\ntype ToasterProps = React.ComponentProps<typeof Sonner>;\nconst Toaster = ({ ...props }: ToasterProps) => {\n  return (\n    <Sonner\n      theme=\"dark\"\n      className=\"toaster group\"\n      toastOptions={{\n        classNames: {\n          toast: \"group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg\",\n          description: \"group-[.toast]:text-muted-foreground\",\n          actionButton: \"group-[.toast]:bg-primary group-[.toast]:text-primary-foreground\",\n          cancelButton: \"group-[.toast]:bg-muted group-[.toast]:text-muted-foreground\",\n        },\n      }}\n      {...props}\n    />\n  );\n};\nexport { Toaster, toast };\n')"
-          echo "sonner.tsx patched"
-          python3 -c "
-import re
-content = open('index.html').read()
-content = re.sub(r'<link rel=\"preconnect\" href=\"https://fonts\.googleapis\.com\"[^>]*/>\s*', '', content)
-content = re.sub(r'<link rel=\"preconnect\" href=\"https://fonts\.gstatic\.com\"[^>]*/>\s*', '', content)
-content = re.sub(r'<link href=\"https://fonts\.googleapis\.com[^>]*/>\s*', '', content)
-open('index.html', 'w').write(content)
-print('index.html Google Fonts removed')
-"
-          python3 -c "
-content = open('src/App.tsx').read()
-content = content.replace('import { Toaster as Sonner } from \"@/components/ui/sonner\";', '')
-content = content.replace('import { Toaster as Sonner } from \"@/components/ui/sonner\"', '')
-content = content.replace('        <Sonner />', '')
-content = content.replace('        <Sonner/>', '')
-open('src/App.tsx', 'w').write(content)
-print('App.tsx Sonner removed')
-"
-          grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
-          grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
-          sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
-          grep "isChecking" src/hooks/useBiometricAuth.ts && sed -i "s/isChecking: true,/isChecking: false,/" src/hooks/useBiometricAuth.ts
-          echo "=== Verify capacitor config ==="
-          head -3 capacitor.config.ts
-          echo "=== Verify sonner ==="
-          head -1 src/components/ui/sonner.tsx
-          echo "=== Verify index.html ==="
-          grep -c "googleapis" index.html || echo "0 googleapis references - clean"
-          echo "=== Verify App.tsx ==="
-          grep -c "Sonner" src/App.tsx || echo "0 Sonner references - clean"
-          echo "All patches done"
+        script: python3 patch.py
       - name: Build web app
         script: |
           export VITE_SUPABASE_URL="https://hhvdxkxaiauzikavtpuj.supabase.co"
