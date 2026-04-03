@@ -1,4 +1,4 @@
-import re, os
+import re, os, subprocess
 
 open('capacitor.config.ts','w').write('import type { CapacitorConfig } from "@capacitor/cli";\nconst config: CapacitorConfig = {\n  appId: "com.vaultbaseball.os",\n  appName: "VAULT OS",\n  webDir: "dist",\n  server: { androidScheme: "https", iosScheme: "app", hostname: "vaultos" },\n  plugins: {\n    PushNotifications: { presentationOptions: ["badge", "sound", "alert"] },\n    NativeBiometric: { useFallback: true },\n    SplashScreen: { launchShowDuration: 2000, launchAutoHide: true, backgroundColor: "#0d0d0d", androidScaleType: "CENTER_CROP", showSpinner: false },\n    StatusBar: { style: "Dark", backgroundColor: "#0d0d0d" },\n  },\n  ios: { scheme: "App", contentInset: "automatic", backgroundColor: "#0d0d0d", preferredContentMode: "mobile", limitsNavigationsToAppBoundDomains: false, allowsLinkPreview: false },\n  android: { allowMixedContent: false, backgroundColor: "#0d0d0d", captureInput: true, webContentsDebuggingEnabled: false },\n};\nexport default config;\n')
 print("capacitor.config.ts rewritten")
@@ -36,5 +36,15 @@ if os.path.exists(path):
     c = c.replace('isChecking: true,', 'isChecking: false,')
     open(path,'w').write(c)
     print("useBiometricAuth patched")
+
+content = open('vite.config.ts').read()
+if 'base:' not in content:
+    content = content.replace("export default defineConfig(({ mode }) => ({", "export default defineConfig(({ mode }) => ({\n  base: \"./\",")
+    open('vite.config.ts','w').write(content)
+    print("vite.config.ts base path set to ./")
+else:
+    content = re.sub(r'base:\s*["\'].*?["\']', 'base: "./"', content)
+    open('vite.config.ts','w').write(content)
+    print("vite.config.ts base path confirmed ./")
 
 print("ALL PATCHES COMPLETE")
