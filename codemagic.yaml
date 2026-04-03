@@ -87,7 +87,6 @@ print('App.tsx Sonner removed')
         notify:
           success: true
           failure: true
-
   ios-app-store:
     name: VAULT OS iOS
     max_build_duration: 60
