@@ -8,7 +8,7 @@ workflows:
         - vault_keystore
       vars:
         PACKAGE_NAME: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
       java: 21
     scripts:
       - name: Install dependencies
@@ -36,8 +36,8 @@ workflows:
       - name: Build Android AAB
         script: |
           cd android
-          sed -i "s/versionCode [0-9]*/versionCode 9/" app/build.gradle
-          sed -i 's/versionName "[^"]*"/versionName "1.0.8"/' app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode 10/" app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.9"/' app/build.gradle
           ./gradlew bundleRelease \
             -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
             -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
@@ -63,7 +63,7 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.vaultbaseball.os
-      node: 22.11.0
+      node: v22.11.0
     scripts:
       - name: Install dependencies
         script: npm install --legacy-peer-deps
@@ -102,6 +102,10 @@ workflows:
           head -1 src/components/ui/sonner.tsx
           echo "=== index.html googleapis check ==="
           grep "googleapis" index.html || echo "CLEAN"
+          echo "=== Checking scheme registration ==="
+          grep -r "vaultos\|iosScheme\|CFBundleURL" ios/App/App/Info.plist | head -10
+          echo "=== Checking main.tsx ==="
+          cat src/main.tsx
       - name: Set app icon
         script: |
           ICON_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
