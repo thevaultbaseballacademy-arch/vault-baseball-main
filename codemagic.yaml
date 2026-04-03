@@ -19,6 +19,24 @@ workflows:
           echo "capacitor.config.ts rewritten"
           python3 -c "open('src/components/ui/sonner.tsx','w').write('import { Toaster as Sonner, toast } from \"sonner\";\ntype ToasterProps = React.ComponentProps<typeof Sonner>;\nconst Toaster = ({ ...props }: ToasterProps) => {\n  return (\n    <Sonner\n      theme=\"dark\"\n      className=\"toaster group\"\n      toastOptions={{\n        classNames: {\n          toast: \"group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg\",\n          description: \"group-[.toast]:text-muted-foreground\",\n          actionButton: \"group-[.toast]:bg-primary group-[.toast]:text-primary-foreground\",\n          cancelButton: \"group-[.toast]:bg-muted group-[.toast]:text-muted-foreground\",\n        },\n      }}\n      {...props}\n    />\n  );\n};\nexport { Toaster, toast };\n')"
           echo "sonner.tsx patched"
+          python3 -c "
+import re
+content = open('index.html').read()
+content = re.sub(r'<link rel=\"preconnect\" href=\"https://fonts\.googleapis\.com\"[^>]*/>\s*', '', content)
+content = re.sub(r'<link rel=\"preconnect\" href=\"https://fonts\.gstatic\.com\"[^>]*/>\s*', '', content)
+content = re.sub(r'<link href=\"https://fonts\.googleapis\.com[^>]*/>\s*', '', content)
+open('index.html', 'w').write(content)
+print('index.html Google Fonts removed')
+"
+          python3 -c "
+content = open('src/App.tsx').read()
+content = content.replace('import { Toaster as Sonner } from \"@/components/ui/sonner\";', '')
+content = content.replace('import { Toaster as Sonner } from \"@/components/ui/sonner\"', '')
+content = content.replace('        <Sonner />', '')
+content = content.replace('        <Sonner/>', '')
+open('src/App.tsx', 'w').write(content)
+print('App.tsx Sonner removed')
+"
           grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
           grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
@@ -27,6 +45,10 @@ workflows:
           head -3 capacitor.config.ts
           echo "=== Verify sonner ==="
           head -1 src/components/ui/sonner.tsx
+          echo "=== Verify index.html ==="
+          grep -c "googleapis" index.html || echo "0 googleapis references - clean"
+          echo "=== Verify App.tsx ==="
+          grep -c "Sonner" src/App.tsx || echo "0 Sonner references - clean"
           echo "All patches done"
       - name: Build web app
         script: |
@@ -49,8 +71,8 @@ workflows:
       - name: Build Android AAB
         script: |
           cd android
-          sed -i "s/versionCode [0-9]*/versionCode 8/" app/build.gradle
-          sed -i 's/versionName "[^"]*"/versionName "1.0.7"/' app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode 9/" app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.8"/' app/build.gradle
           ./gradlew bundleRelease \
             -Pandroid.injected.signing.store.file=$CM_KEYSTORE_PATH \
             -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
@@ -86,6 +108,24 @@ workflows:
           echo "capacitor.config.ts rewritten"
           python3 -c "open('src/components/ui/sonner.tsx','w').write('import { Toaster as Sonner, toast } from \"sonner\";\ntype ToasterProps = React.ComponentProps<typeof Sonner>;\nconst Toaster = ({ ...props }: ToasterProps) => {\n  return (\n    <Sonner\n      theme=\"dark\"\n      className=\"toaster group\"\n      toastOptions={{\n        classNames: {\n          toast: \"group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg\",\n          description: \"group-[.toast]:text-muted-foreground\",\n          actionButton: \"group-[.toast]:bg-primary group-[.toast]:text-primary-foreground\",\n          cancelButton: \"group-[.toast]:bg-muted group-[.toast]:text-muted-foreground\",\n        },\n      }}\n      {...props}\n    />\n  );\n};\nexport { Toaster, toast };\n')"
           echo "sonner.tsx patched"
+          python3 -c "
+import re
+content = open('index.html').read()
+content = re.sub(r'<link rel=\"preconnect\" href=\"https://fonts\.googleapis\.com\"[^>]*/>\s*', '', content)
+content = re.sub(r'<link rel=\"preconnect\" href=\"https://fonts\.gstatic\.com\"[^>]*/>\s*', '', content)
+content = re.sub(r'<link href=\"https://fonts\.googleapis\.com[^>]*/>\s*', '', content)
+open('index.html', 'w').write(content)
+print('index.html Google Fonts removed')
+"
+          python3 -c "
+content = open('src/App.tsx').read()
+content = content.replace('import { Toaster as Sonner } from \"@/components/ui/sonner\";', '')
+content = content.replace('import { Toaster as Sonner } from \"@/components/ui/sonner\"', '')
+content = content.replace('        <Sonner />', '')
+content = content.replace('        <Sonner/>', '')
+open('src/App.tsx', 'w').write(content)
+print('App.tsx Sonner removed')
+"
           grep "isLoading" src/contexts/SubscriptionContext.tsx && sed -i "s/const \[isLoading, setIsLoading\] = useState(true)/const [isLoading, setIsLoading] = useState(false)/" src/contexts/SubscriptionContext.tsx
           grep "useState(true)" src/contexts/SportContext.tsx && sed -i "s/const \[loading, setLoading\] = useState(true)/const [loading, setLoading] = useState(false)/" src/contexts/SportContext.tsx
           sed -i "s/loading: true,/loading: false,/" src/contexts/SportContext.tsx
@@ -94,6 +134,10 @@ workflows:
           head -3 capacitor.config.ts
           echo "=== Verify sonner ==="
           head -1 src/components/ui/sonner.tsx
+          echo "=== Verify index.html ==="
+          grep -c "googleapis" index.html || echo "0 googleapis references - clean"
+          echo "=== Verify App.tsx ==="
+          grep -c "Sonner" src/App.tsx || echo "0 Sonner references - clean"
           echo "All patches done"
       - name: Build web app
         script: |
